@@ -1,0 +1,5 @@
+*.o
+*.so
+build
+*.hi
+*.swp

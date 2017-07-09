@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import qualified DyNet as Dy
 
 main :: IO ()
-main = someFunc
+main = Dy.main

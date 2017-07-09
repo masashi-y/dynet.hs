@@ -15,11 +15,15 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     DyNet, Vector
   build-depends:       base >= 4.7 && < 5
+  build-tools:         cpphs
+  extra-libraries:     dynet, dynetc
+  extra-lib-dirs:      /Users/masashi-y/dynet.hs/c
+  ghc-options:         -cpp -pgmPcpphs -optP--cpp
   default-language:    Haskell2010
 
-executable DyNet-exe
+executable train-xor
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
