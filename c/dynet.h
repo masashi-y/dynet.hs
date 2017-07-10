@@ -55,6 +55,7 @@ extern "C" {
     int Dim_cols(CDim* d);
     unsigned Dim_at(CDim* d, unsigned i);
     void Dim_set(CDim* d, unsigned i, unsigned s);
+    void delete_Dim(CDim* d);
     // int Dim_size(CDim* d, unsigned i);
     // CDim* Dim_transpose(CDim* d);
 

@@ -31,6 +31,7 @@ int Dim_rows(CDim* d) { return reinterpret_cast<Dim*>(d)->rows(); }
 int Dim_cols(CDim* d) { return reinterpret_cast<Dim*>(d)->cols(); }
 unsigned Dim_at(CDim* d, unsigned i) { return (*reinterpret_cast<Dim*>(d))[i]; }
 void Dim_set(CDim* d, unsigned i, unsigned s) { return reinterpret_cast<Dim*>(d)->set(i, s); }
+void delete_Dim(CDim* d) { delete reinterpret_cast<Dim*>(d); }
 // int Dim_size(CDim* d, unsigned i) { return reinterpret_cast<Dim*>(d)->size(i); }
 // CDim* Dim_transpose(CDim* d) { return reinterpret_cast<Dim*>(d)->transpose(); }
 
