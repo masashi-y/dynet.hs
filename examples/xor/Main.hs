@@ -31,8 +31,8 @@ main = do
     yValue <- V.fromList [0]
     y <- D.input cg [1] yValue
 
-    h <- D.tanh =<< (b `D.add`) =<< mW `D.mul` x  -- tanh (W * x + b)
-    y_pred <- (a `D.add`) =<< mV `D.mul` h
+    h <- D.tanh $ mW `D.mul` x `D.add` b
+    y_pred <- mV `D.mul` h `D.add` a
     lossExp <- D.squaredDistance y_pred y
 
     D.printGaphviz cg
