@@ -4,6 +4,7 @@ import Control.Monad ( forM )
 import qualified DyNet.Core as D
 import qualified DyNet.Expr as D
 import qualified DyNet.Vector as V
+import qualified DyNet.Train as V
 
 main = do
     let hiddenSize = 8
@@ -20,19 +21,19 @@ main = do
 
     cg <- D.createComputationGraph
 
-    mW <- D.parameter cg p_W
+    _W <- D.parameter cg p_W
     b <- D.parameter cg p_b
-    mV <- D.parameter cg p_V
+    _V <- D.parameter cg p_V
     a <- D.parameter cg p_a
 
-    xValues <- V.fromList [0, 0]
+    xValues <- V.fromList ([0, 0] :: [Float])
     x <- D.input cg [2] xValues
 
-    yValue <- V.fromList [0]
+    yValue <- V.fromList ([0] :: [Float])
     y <- D.input cg [1] yValue
 
-    h <- D.tanh $ mW `D.mul` x `D.add` b
-    y_pred <- mV `D.mul` h `D.add` a
+    h <- D.tanh $ _W `D.mul` x `D.add` b
+    y_pred <- _V `D.mul` h `D.add` a
     lossExp <- D.squaredDistance y_pred y
 
     D.printGaphviz cg

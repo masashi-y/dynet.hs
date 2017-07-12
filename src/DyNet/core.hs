@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 
 module DyNet.Core (
     Model,
@@ -7,13 +8,11 @@ module DyNet.Core (
     Tensor,
     ComputationGraph,
     Dim,
-    Trainer,
     createModel,
     createComputationGraph,
-    createSimpleSGDTrainer,
-    update,
     asScalar,
     addParameters,
+    addLookupParameters,
     printGaphviz,
     forward,
     backward,
@@ -21,9 +20,11 @@ module DyNet.Core (
 ) where
 
 import DyNet.Internal.Core
+import DyNet.Internal.ExpVector
 
 initialize :: [String] -> Bool -> IO ()
 initialize argv shared_parameters = do
     let argc = fromIntegral $ length argv
         argv' = unwords argv
     dynetInitialize argc argv' shared_parameters
+

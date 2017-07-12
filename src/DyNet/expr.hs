@@ -5,9 +5,13 @@ module DyNet.Expr (
     tanh,
     add,
     mul,
+    concat,
     squaredDistance,
+    affineTransform,
+    pickneglogsoftmax,
+    sum
 ) where
 
-import Prelude hiding ( tanh )
+import Prelude hiding ( tanh, concat, sum )
 import DyNet.Internal.Expr
 

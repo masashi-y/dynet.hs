@@ -71,6 +71,7 @@ void Model_add_lookup_parameters_1(CModel* m, CLookupParameter* p, unsigned n, C
 CParameterInit* new_CParameterInitNormal(float m, float v) { return reinterpret_cast<CParameterInit*>(new ParameterInitNormal(m, v)); }
 void init_CParameterInitNormal(CParameterInit* p, float m, float v) { new (p) ParameterInitNormal(m, v); }
 
+CExpression* new_Expression() { return reinterpret_cast<CExpression*>(new Expression()); }
 unsigned size_of_Expression() { return sizeof(Expression); }
 void delete_Expression(CExpression* x) { delete reinterpret_cast<Expression*>(x); }
 
