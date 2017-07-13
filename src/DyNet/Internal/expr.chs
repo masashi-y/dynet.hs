@@ -9,6 +9,7 @@ module DyNet.Internal.Expr where
 
 import qualified Foreign.Ptr as C2HSImp
 import Foreign.Storable
+import Prelude hiding ( concat )
 ---import DyNet.Vector
 
 #include "dynet.h"
@@ -33,16 +34,17 @@ instance FloatSequence [Float] where
 instance FloatSequence FloatVector where
     withFS = withFloatVector
 
+-- f x@(Expression fptr) = C2HSImp.addForeignPtrFinalizer delete_Expression fptr >> return x
 -- parameter
 {#fun c_parameter as parameter
     {+S, `ComputationGraph', `Parameter'} -> `Expression' #} 
 
 -- input
 {#fun c_input_1 as input
-    `(FloatSequence fs)' =>
+    `(FloatSequence fs, Integral d)' =>
     {+S,
      `ComputationGraph',
-     withDim* `Dim',
+     withDim* `[d]',
      withFS* `fs'} -> `Expression' #} 
 
 -- tanh
@@ -74,13 +76,23 @@ withExpList list f = fromList list >>= (\x -> withExpressionVector x f)
 {#fun c_affine_transform as affineTransform
     {+S, withExpList* `[Expression]'} -> `Expression' #} 
 
+withUIntList :: Integral a => [a] -> (C2HSImp.Ptr UIntVector -> IO b) -> IO b
+withUIntList list f = fromList (map fromIntegral list) >>= \list' -> withUIntVector list' f
+
+-- lookup
+{#fun c_lookup_0 as lookup
+     {+S, `ComputationGraph', `LookupParameter', `Int'} -> `Expression' #} 
+
 -- lookup
 {#fun c_lookup_1 as lookup'
-     {+S, `ComputationGraph', `LookupParameter', `UIntVector'} -> `Expression' #} 
+    `Integral a' =>
+     {+S, `ComputationGraph', `LookupParameter', withUIntList* `[a]'} -> `Expression' #} 
 
 -- concatenate
 {#fun c_concat as concat
     {+S,  withExpList* `[Expression]', `Int'} -> `Expression' #} 
+
+concat' x = concat x 0
 
 -- pickneglogsoftmax
 {#fun c_pickneglogsoftmax as pickneglogsoftmax

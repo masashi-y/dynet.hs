@@ -6,8 +6,9 @@ module DyNet.Internal.Core where
 import Foreign.C.Types ( CInt(..), CChar(..), CFloat(..), CLong(..), CUInt(..) )
 import Foreign.Ptr     ( Ptr(..), FunPtr(..), castPtr )
 import Foreign.Storable ( Storable(..) )
-import Foreign.Marshal.Alloc ( alloca )
-import Foreign.C.String ( newCString, withCString )
+import Foreign.Marshal.Alloc
+import Foreign.Marshal.Array
+import Foreign.C.String
 import Foreign.ForeignPtr ( newForeignPtr )
 import Control.Monad (forM)
 
@@ -18,7 +19,7 @@ import DyNet.Vector
 
 #include "dynet.h"
 
-type Dim = [Int64]
+-- type Dim = [Int64]
 withDim d f = dim d >>= flip withHDim f
 
 {#pointer *CModel as Model
@@ -37,7 +38,7 @@ withDim d f = dim d >>= flip withHDim f
     foreign finalizer delete_Tensor newtype #}
 
 {#pointer *CComputationGraph as ComputationGraph
-    foreign finalizer delete_ComputationGraph newtype #}
+    foreign finalizer doNothing newtype #}
 
 {#pointer *CDim as HDim
     foreign finalizer delete_Dim newtype #}
@@ -50,13 +51,20 @@ withDim d f = dim d >>= flip withHDim f
 
 {#fun c_as_scalar as asScalar {`Tensor'} -> `Float' #}
 
+{#fun c_as_vector as asVector {+S, `Tensor'} -> `FloatVector' #}
+
 {#fun Model_add_parameters as addParameters
-    {`Model', +S, withDim* `Dim'} -> `Parameter' #}
+    `Integral d' =>
+    {`Model', +S, withDim* `[d]'} -> `Parameter' #}
 
 {#fun Model_add_lookup_parameters as addLookupParameters
-    {`Model', +S, `Int', withDim* `Dim'} -> `LookupParameter' #}
+    `Integral d' =>
+    {`Model', +S, `Int', withDim* `[d]'} -> `LookupParameter' #}
 
-{#fun ComputationGraph_print_graphviz as printGaphviz
+{#fun ComputationGraph_print_graphviz as printGraphviz
+    {`ComputationGraph'} -> `()' #} 
+
+{#fun delete_ComputationGraph as ^
     {`ComputationGraph'} -> `()' #} 
 
 -- Tensor returned by "forward" is owned by DyNet
@@ -107,16 +115,28 @@ instance Storable Expression where
 {#fun new_Dim_v as ^ {`LongVector'} -> `HDim' #}
 {#fun Dim_size as ^ {`HDim'} -> `Int' #}
 
-dim :: Dim -> IO HDim
-dim list = fromList list >>= newDimV
+dim :: Integral a => [a] -> IO HDim
+dim list = fromList (map fromIntegral list) >>= newDimV
 
 
-stringToPtrPtrChar s f = withCString s (\s' -> alloca (\p -> poke p s' >> f p))
+initialize :: [String] -> Bool -> IO [String]
+initialize argv shared_parameters = do
+    let argv' = "":argv
+        len = length argv'
+    cargv <- mapM newCString argv'
+    cargv' <- allocaArray len $ \ptr ->
+        alloca $ \ptr' -> do
+        pokeArray ptr cargv
+        poke ptr' (fromIntegral len)
+        dynetInitialize ptr' ptr shared_parameters
+        len' <- peek ptr'
+        peekArray (fromIntegral len') ptr
+    (_:res) <- mapM peekCString cargv'
+    mapM free cargv
+    return res
 
-{#fun dynet_initialize as ^
-    {`Int', stringToPtrPtrChar* `String', `Bool'} -> `()' #}
-
-
+foreign import ccall "dynet_initialize"
+    dynetInitialize :: Ptr CInt -> Ptr (Ptr CChar) -> Bool -> IO ()
 foreign import ccall "size_of_Model"
     sizeOfModel :: CInt
 foreign import ccall "size_of_ComputationGraph"
@@ -127,18 +147,4 @@ foreign import ccall "size_of_LookupParameter"
     sizeOfLookupParameter :: CInt
 foreign import ccall "size_of_Expression"
     sizeOfExpression :: CInt
-
--- #define declareInstanceStorable(TYPE)             \
---     foreign import ccall "size_of_/**/TYPE"       \
---         sizeOf/**/TYPE :: CInt;                   \
---     instance Storable TYPE where;                 \
---         sizeOf _ = fromIntegral $ sizeOf/**/TYPE; \
---         alignment _ = 4;                          \
---         peek = undefined;                         \
---         poke = undefined
--- 
--- declareInstanceStorable(Model)
--- declareInstanceStorable(ComputationGraph)
--- declareInstanceStorable(Parameter)
-
 

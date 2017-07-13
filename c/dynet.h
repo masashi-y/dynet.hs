@@ -39,7 +39,7 @@ typedef struct CTrainer CTrainer;
 extern "C" {
 #endif
 
-void dynet_initialize(int c, char** arg, bool shared_parameters);
+void dynet_initialize(int* c, char** arg, bool shared_parameters);
 
 CDim* new_Dim_v(LongVector* ds);
 CDim* new_Dim_v_int(LongVector* ds, int bs);
@@ -95,13 +95,7 @@ const CTensor* ComputationGraph_forward(CComputationGraph* g, CExpression* expr)
 void ComputationGraph_backward(CComputationGraph* g, CExpression* expr);
 
 float c_as_scalar(const CTensor* t);
-// void Trainer_update(CTrainer* t, float s);
-// CTrainer* new_SimpleSGDTrainer(CModel* m, float e0, float edecay);
-// void init_SimpleSGDTrainer(CTrainer* t, CModel* m, float e0, float edecay);
-// unsigned size_of_SimpleSGDTrainer();
-// void delete_SimpleSGDTrainer(CTrainer* t);
-// unsigned size_of_Trainer();
-// void delete_Trainer(CTrainer* t);
+void c_as_vector(FloatVector* out, const CTensor* t);
 
 CExpression* new_Expression();
 unsigned size_of_Expression();
@@ -116,6 +110,7 @@ void c_const_parameter (CExpression* out, CComputationGraph* g, CParameter* p);
 void c_const_parameter_1 (CExpression* out, CComputationGraph* g, CLookupParameter* p);
 // CExpression c_lookup "lookup" (CComputationGraph* g, CLookupParameter* p, unsigned index)
 void c_lookup (CExpression* out, CComputationGraph* g, CLookupParameter* p, unsigned* pindex);
+void c_lookup_0 (CExpression* out, CComputationGraph* g, CLookupParameter* p, unsigned pindex);
 void c_lookup_1 (CExpression* out, CComputationGraph* g, CLookupParameter* p, UIntVector* pindices);
 // CExpression c_const_lookup "const_lookup" (CComputationGraph* g, CLookupParameter* p, unsigned index)
 void c_const_lookup (CExpression* out, CComputationGraph* g, CLookupParameter* p, unsigned* pindex);

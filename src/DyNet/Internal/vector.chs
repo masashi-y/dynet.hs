@@ -45,9 +45,11 @@ class Vectorizable a where
     size :: Vector a -> IO Int
     debug :: Vector a -> IO ()
     insert :: Vector a -> Int -> a -> IO ()
+    toList :: Vector a -> IO [a]
 
     fromList :: [a] -> IO (Vector a)
     fromList list = constructor list (length list)
+
 
 -- ######################################################
 -- ###################### Int Vector ####################
@@ -58,16 +60,21 @@ instance Vectorizable Int where
     size = intVectorSize
     pushBack = intVectorPushBack
     debug = intVectorShow
-    -- cCopy = intVectorCopy
+    toList = intVectorCopy
     insert = intVectorSet
     (!) = intVectorGet
 
+instance Storable IntVector where
+    sizeOf _ = fromIntegral sizeOfIntVector
+    alignment _ = 4
+    poke = undefined
+    peek = undefined
 
 {#pointer *IntVector as IntVector
     foreign finalizer delete_IntVector newtype #}
 
 {#fun init_IntVector_intp_int as newIntVector
-    {+, allocaIntArray* `[Int]', `Int'} -> `IntVector' #}
+    {+S, allocaIntArray* `[Int]', `Int'} -> `IntVector' #}
 
 {#fun IntVector_size as ^
     {`IntVector'} -> `Int' #}
@@ -84,8 +91,20 @@ instance Vectorizable Int where
 {#fun IntVector_show as ^
     {`IntVector'} -> `()' #}
 
+-- TODO I don't know how to tell peekArray the length of the output
 -- {#fun IntVector_copy as ^
---     {`IntVector', allocaIntArray* `[Int]' id} -> `[Int]' peekArray* #}
+--      {`IntVector', allocaIntArray* `[Int]'} -> `[Int]' peekArray* #}
+
+foreign import ccall safe "IntVector_copy"
+  intVectorCopy'_ :: Ptr IntVector -> Ptr CInt -> IO (Ptr CInt)
+
+intVectorCopy :: IntVector -> IO [Int]
+intVectorCopy v =
+  withIntVector v $ \v' -> do
+      len <- size v
+      allocaArray len $ \out -> do
+          res <- peekArray len =<< intVectorCopy'_ v' out
+          return $ map fromIntegral res
 
 -- ######################################################
 -- ##################### Float Vector ###################
@@ -98,14 +117,19 @@ instance Vectorizable Float where
     size = floatVectorSize
     pushBack = floatVectorPushBack
     debug = floatVectorShow
-    -- cCopy = floatVectorCopy
+    toList = floatVectorCopy
 
+instance Storable FloatVector where
+    sizeOf _ = fromIntegral sizeOfFloatVector
+    alignment _ = 4
+    poke = undefined
+    peek = undefined
 
 {#pointer *FloatVector as FloatVector
     foreign finalizer delete_FloatVector newtype #}
 
 {#fun init_FloatVector_intp_int as newFloatVector
-    {+, allocaFloatArray* `[Float]', `Int'} -> `FloatVector' #}
+    {+S, allocaFloatArray* `[Float]', `Int'} -> `FloatVector' #}
 
 {#fun FloatVector_size as ^
     {`FloatVector'} -> `Int' #}
@@ -125,6 +149,17 @@ instance Vectorizable Float where
 -- {#fun FloatVector_copy as ^
 --     {`FloatVector', allocaFloatArray* `[Float]'} -> `[Float]' #}
 
+foreign import ccall safe "FloatVector_copy"
+  floatVectorCopy'_ :: Ptr FloatVector -> Ptr CFloat -> IO (Ptr CFloat)
+
+floatVectorCopy :: FloatVector -> IO [Float]
+floatVectorCopy v =
+  withFloatVector v $ \v' -> do
+      len <- size v
+      allocaArray len $ \out -> do
+          res <- peekArray len =<< floatVectorCopy'_ v' out
+          return $ map realToFrac res
+
 -- ######################################################
 -- ##################### Long Vector ####################
 -- ######################################################
@@ -134,16 +169,21 @@ instance Vectorizable Int64 where
     size = longVectorSize
     pushBack = longVectorPushBack
     debug = longVectorShow
-    -- cCopy = longVectorCopy
     insert = longVectorSet
     (!) = longVectorGet
+    toList = longVectorCopy
 
+instance Storable LongVector where
+    sizeOf _ = fromIntegral sizeOfLongVector
+    alignment _ = 4
+    poke = undefined
+    peek = undefined
 
 {#pointer *LongVector as LongVector
     foreign finalizer delete_LongVector newtype #}
 
 {#fun init_LongVector_intp_int as newLongVector
-    {+, allocaIntArray* `[Int64]', `Int'} -> `LongVector' #}
+    {+S, allocaIntArray* `[Int64]', `Int'} -> `LongVector' #}
 
 {#fun LongVector_size as ^
     {`LongVector'} -> `Int' #}
@@ -163,6 +203,17 @@ instance Vectorizable Int64 where
 -- {#fun IntVector_copy as ^
 --     {`IntVector', allocaArr* +} -> `[Int]' #}
 
+foreign import ccall safe "LongVector_copy"
+  longVectorCopy'_ :: Ptr LongVector -> Ptr CLong -> IO (Ptr CLong)
+
+longVectorCopy :: LongVector -> IO [Int64]
+longVectorCopy v =
+  withLongVector v $ \v' -> do
+      len <- size v
+      allocaArray len $ \out -> do
+          res <- peekArray len =<< longVectorCopy'_ v' out
+          return $ map fromIntegral res
+
 -- ######################################################
 -- ###################### UInt Vector ###################
 -- ######################################################
@@ -172,16 +223,21 @@ instance Vectorizable Word where
     size = uIntVectorSize
     pushBack = uIntVectorPushBack
     debug = uIntVectorShow
-    -- cCopy = uIntVectorCopy
+    toList = uIntVectorCopy
     insert = uIntVectorSet
     (!) = uIntVectorGet
 
+instance Storable UIntVector where
+    sizeOf _ = fromIntegral sizeOfUIntVector
+    alignment _ = 4
+    poke = undefined
+    peek = undefined
 
 {#pointer *UIntVector as UIntVector
     foreign finalizer delete_UIntVector newtype #}
 
 {#fun init_UIntVector_intp_int as newUIntVector
-    {+, allocaIntArray* `[Word]', `Int'} -> `UIntVector' #}
+    {+S, allocaIntArray* `[Word]', `Int'} -> `UIntVector' #}
 
 {#fun UIntVector_size as ^
     {`UIntVector'} -> `Int' #}
@@ -200,4 +256,23 @@ instance Vectorizable Word where
 
 -- -- {#fun UIntVector_copy as ^
 -- --     {`UIntVector', allocaIntArray* `[Int]' id} -> `[Int]' peekArray* #}
--- 
+
+foreign import ccall safe "UIntVector_copy"
+  uIntVectorCopy'_ :: Ptr UIntVector -> Ptr CUInt -> IO (Ptr CUInt)
+
+uIntVectorCopy :: UIntVector -> IO [Word]
+uIntVectorCopy v =
+  withUIntVector v $ \v' -> do
+      len <- size v
+      allocaArray len $ \out -> do
+          res <- peekArray len =<< uIntVectorCopy'_ v' out
+          return $ map fromIntegral res
+
+foreign import ccall "size_of_IntVector"
+    sizeOfIntVector :: CInt
+foreign import ccall "size_of_FloatVector"
+    sizeOfFloatVector :: CInt
+foreign import ccall "size_of_LongVector"
+    sizeOfLongVector :: CInt
+foreign import ccall "size_of_UIntVector"
+    sizeOfUIntVector :: CInt

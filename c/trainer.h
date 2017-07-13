@@ -38,6 +38,7 @@ void Trainer_update(CTrainer* t, float scale);
 void Trainer_update_epoch(CTrainer* t, float r);
 float Trainer_clip_gradients(CTrainer* t, float scale);
 void Trainer_rescale_and_reset_weight_decay(CTrainer* t);
+void Trainer_status(CTrainer* t);
 
 
 void init_SimpleSGDTrainer(CSimpleSGDTrainer* t, CModel* m, float e0, float edecay);

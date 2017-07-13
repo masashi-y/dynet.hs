@@ -80,6 +80,10 @@ instance Trainer AdamTrainer where
     `Trainer t' =>
     {castTrainer* `t'} -> `()' #}
 
+{#fun Trainer_status as status
+    `Trainer t' =>
+    {castTrainer* `t'} -> `()' #}
+
 
 {#fun init_SimpleSGDTrainer as createSimpleSGDTrainer
     {+S, `Model', `Float', `Float'} -> `SimpleSGDTrainer' #}
@@ -149,21 +153,21 @@ instance Storable AdamTrainer where
 foreign import ccall "size_of_SimpleSGDTrainer"
     sizeOfSimpleSGDTrainer :: CInt
 
-foreign import ccall "sizeOfCyclicalSGDTrainer"
+foreign import ccall "size_of_CyclicalSGDTrainer"
     sizeOfCyclicalSGDTrainer :: CInt
 
-foreign import ccall "sizeOfMomentumSGDTrainer"
+foreign import ccall "size_of_MomentumSGDTrainer"
     sizeOfMomentumSGDTrainer :: CInt
 
-foreign import ccall "sizeOfAdagradTrainer"
+foreign import ccall "size_of_AdagradTrainer"
     sizeOfAdagradTrainer :: CInt
 
-foreign import ccall "sizeOfAdadeltaTrainer"
+foreign import ccall "size_of_AdadeltaTrainer"
     sizeOfAdadeltaTrainer :: CInt
 
-foreign import ccall "sizeOfRMSPropTrainer"
+foreign import ccall "size_of_RMSPropTrainer"
     sizeOfRMSPropTrainer :: CInt
 
-foreign import ccall "sizeOfAdamTrainer"
+foreign import ccall "size_of_AdamTrainer"
     sizeOfAdamTrainer :: CInt
 

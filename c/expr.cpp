@@ -55,8 +55,14 @@ void c_lookup(CExpression* out, CComputationGraph* g, CLookupParameter* p, unsig
 }
 
 // lookup
+void c_lookup_0(CExpression* out, CComputationGraph* g, CLookupParameter* p, unsigned pindex) {
+    Expression res = lookup(*reinterpret_cast<ComputationGraph*>(g), *reinterpret_cast<LookupParameter*>(p), pindex);
+    *reinterpret_cast<Expression*>(out) = res;
+}
+
+// lookup
 void c_lookup_1(CExpression* out, CComputationGraph* g, CLookupParameter* p, UIntVector* pindices) {
-    Expression res = lookup(*reinterpret_cast<ComputationGraph*>(g), *reinterpret_cast<LookupParameter*>(p), reinterpret_cast<std::vector<unsigned>*>(pindices));
+    Expression res = lookup(*reinterpret_cast<ComputationGraph*>(g), *reinterpret_cast<LookupParameter*>(p), *reinterpret_cast<std::vector<unsigned>*>(pindices));
     *reinterpret_cast<Expression*>(out) = res;
 }
 

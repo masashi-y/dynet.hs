@@ -6,6 +6,8 @@ module DyNet.Internal.ExpVector where
 {#import DyNet.Internal.Core #}
 
 import Foreign.Ptr
+import Foreign.ForeignPtr
+import Foreign.C.Types
 import Foreign.Marshal.Array
 import Foreign.Storable
 import Data.List ( reverse )
@@ -23,16 +25,33 @@ instance Vectorizable Expression where
     size = expressionVectorSize
     pushBack = expressionVectorPushBack
     debug = expressionVectorShow
-    -- cCopy = longVectorCopy
+    toList = expressionVectorCopy
     insert = expressionVectorSet
     (!) = expressionVectorGet
+
+instance Storable ExpressionVector where
+    sizeOf _ = fromIntegral sizeOfExpressionVector
+    alignment _ = 4
+    poke = undefined
+    peek = undefined
+
+foreign import ccall safe "ExpressionVector_copy"
+  expressionVectorCopy'_ :: Ptr ExpressionVector -> Ptr (Ptr Expression) -> IO (Ptr (Ptr Expression))
+
+expressionVectorCopy :: ExpressionVector -> IO [Expression]
+expressionVectorCopy v =
+  withExpressionVector v $ \v' -> do
+      len <- size v
+      allocaArray len $ \out -> do
+          res <- peekArray len =<< expressionVectorCopy'_ v' out
+          mapM (\x -> newForeignPtr_ x >>= return . Expression) res
 
 
 initExpList :: [Expression] -> (Ptr (Ptr Expression) -> IO a) -> IO a
 initExpList xs f = initExpList' xs f []
     where initExpList' (x:xs) f ps = withExpression x (\p -> initExpList' xs f (p:ps))
           initExpList' [] f ps =
-              allocaArray ((length ps) * 8) $ \ptr -> do
+              allocaArray ((length ps) * sizeOf (undefined :: Ptr ())) $ \ptr -> do
               pokeArray ptr (reverse ps)
               f ptr
 
@@ -40,7 +59,7 @@ initExpList xs f = initExpList' xs f []
     foreign finalizer delete_ExpressionVector newtype #}
 
 {#fun init_ExpressionVector_intp_int as newExpressionVector
-    {+, initExpList* `[Expression]', `Int'} -> `ExpressionVector' #}
+    {+S, initExpList* `[Expression]', `Int'} -> `ExpressionVector' #}
 
 {#fun ExpressionVector_size as ^
     {`ExpressionVector'} -> `Int' #}
@@ -57,3 +76,5 @@ initExpList xs f = initExpList' xs f []
 {#fun ExpressionVector_show as ^
     {`ExpressionVector'} -> `()' #}
 
+foreign import ccall "size_of_ExpressionVector"
+    sizeOfExpressionVector :: CInt

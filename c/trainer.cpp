@@ -1,17 +1,20 @@
 
 #include <vector>
+#include <iostream>
 #include "trainer.h"
 
 #include "dynet/training.h"
 #include "dynet/model.h"
 
 using namespace dynet;
+using namespace std;
 
 // void Trainer_update_subset(CTrainer* t, UIntVector* updated_params, UIntVector* updated_lookup_params, float scale) {
 //     reinterpret_cast<Trainer*>(t)->
 //         update(*reinterpret_cast<const std::vector<unsigned>*>(updated_params),
 //    *reinterpret_cast<const std::vector<unsigned>*>(updated_lookup_params), scale);
 // }
+
 void Trainer_update(CTrainer* t, float scale) {
     reinterpret_cast<Trainer*>(t)->update(scale);
 }
@@ -28,6 +31,9 @@ void Trainer_rescale_and_reset_weight_decay(CTrainer* t) {
     reinterpret_cast<Trainer*>(t)->rescale_and_reset_weight_decay();
 }
 
+void Trainer_status(CTrainer* t) {
+    reinterpret_cast<Trainer*>(t)->status();
+}
 
 
 void init_SimpleSGDTrainer(CSimpleSGDTrainer* t, CModel* m, float e0, float edecay) {
@@ -94,31 +100,31 @@ unsigned size_of_AdamTrainer() {
 }
 
 void delete_SimpleSGDTrainer(CSimpleSGDTrainer* t) {
-    delete reinterpret_cast<SimpleSGDTrainer*>(t);
+    reinterpret_cast<SimpleSGDTrainer*>(t)->~SimpleSGDTrainer();
 }
 
 void delete_CyclicalSGDTrainer(CCyclicalSGDTrainer* t) {
-    delete reinterpret_cast<CyclicalSGDTrainer*>(t);
+    reinterpret_cast<CyclicalSGDTrainer*>(t)->~CyclicalSGDTrainer();
 }
 
 void delete_MomentumSGDTrainer(CMomentumSGDTrainer* t) {
-    delete reinterpret_cast<MomentumSGDTrainer*>(t);
+    reinterpret_cast<MomentumSGDTrainer*>(t)->~MomentumSGDTrainer();
 }
 
 void delete_AdagradTrainer(CAdagradTrainer* t) {
-    delete reinterpret_cast<AdagradTrainer*>(t);
+    reinterpret_cast<AdagradTrainer*>(t)->~AdagradTrainer();
 }
 
 void delete_AdadeltaTrainer(CAdadeltaTrainer* t) {
-    delete reinterpret_cast<AdadeltaTrainer*>(t);
+    reinterpret_cast<AdadeltaTrainer*>(t)->~AdadeltaTrainer();
 }
 
 void delete_RMSPropTrainer(CRMSPropTrainer* t) {
-    delete reinterpret_cast<RMSPropTrainer*>(t);
+    reinterpret_cast<RMSPropTrainer*>(t)->~RMSPropTrainer();
 }
 
 void delete_AdamTrainer(CAdamTrainer* t) {
-    delete reinterpret_cast<AdamTrainer*>(t);
+    reinterpret_cast<AdamTrainer*>(t)->~AdamTrainer();
 }
 
 

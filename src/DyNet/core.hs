@@ -7,24 +7,35 @@ module DyNet.Core (
     Expression,
     Tensor,
     ComputationGraph,
-    Dim,
     createModel,
-    createComputationGraph,
+    withNewComputationGraph,
     asScalar,
+    asVector,
     addParameters,
     addLookupParameters,
-    printGaphviz,
+    printGraphviz,
     forward,
     backward,
     initialize,
+    initialize',
+    argmax
 ) where
 
 import DyNet.Internal.Core
 import DyNet.Internal.ExpVector
+import Foreign.ForeignPtr ( finalizeForeignPtr )
+import Data.List ( maximumBy )
 
-initialize :: [String] -> Bool -> IO ()
-initialize argv shared_parameters = do
-    let argc = fromIntegral $ length argv
-        argv' = unwords argv
-    dynetInitialize argc argv' shared_parameters
+initialize' :: [String] -> IO [String]
+initialize' argv = initialize argv False
+
+withNewComputationGraph :: (ComputationGraph -> IO a) -> IO a
+withNewComputationGraph f = do
+    cg@(ComputationGraph ptr) <- createComputationGraph
+    res <- f cg
+    deleteComputationGraph cg
+    return res
+
+argmax :: [Float] -> Int
+argmax list = fst $ maximumBy (\(_, m) (_, n) -> compare m n) $ zip [0..] list
 

@@ -21,7 +21,7 @@ void init_CSimpleRNNBuilder(CSimpleRNNBuilder* rnn, unsigned layers, unsigned we
 }
 
 void delete_CSimpleRNNBuilder(CSimpleRNNBuilder* m) {
-    delete reinterpret_cast<SimpleRNNBuilder*>(m);
+    reinterpret_cast<SimpleRNNBuilder*>(m)->~SimpleRNNBuilder();
 }
 
 unsigned size_of_SimpleRNNBuilder() {
@@ -59,7 +59,7 @@ void init_CVanillaLSTMBuilder(CVanillaLSTMBuilder* rnn, unsigned layers, unsigne
 }
 
 void delete_CVanillaLSTMBuilder(CVanillaLSTMBuilder* m) {
-    delete reinterpret_cast<VanillaLSTMBuilder*>(m);
+    reinterpret_cast<VanillaLSTMBuilder*>(m)->~VanillaLSTMBuilder();
 }
 
 unsigned size_of_VanillaLSTMBuilder() {

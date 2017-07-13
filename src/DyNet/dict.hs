@@ -4,14 +4,14 @@ module DyNet.Dict (
     Dict,
     createDict,
     contains,
-    fromId,
-    fromWord
+    fromIndex,
+    fromString
 ) where
 
 import qualified Data.Text as T
 import qualified Data.HashTable.IO as H
 import Data.Tuple ( swap )
-import Data.Maybe ( isJust )
+import Data.Maybe ( isJust, fromJust )
 import Prelude hiding ( Word )
 
 type Word = T.Text
@@ -26,23 +26,24 @@ data Dict = Dict { wordToId :: Table Word ID
 createDict :: [Word] -> Maybe Word -> IO Dict
 createDict list unk =
     Dict <$> (H.fromList list') <*> (H.fromList $ map swap list') <*> (return unk)
-    where list' = zip list [1..]
+    where list' = zip (unk' ++ list) [0..]
+          unk' = maybe [] return unk
 
 contains :: Dict -> Word -> IO Bool
 contains (Dict dict _ _) word = H.lookup dict word >>= (return . isJust)
 
-fromId :: Dict -> ID -> IO Word
-fromId (Dict _ dict unk) k = do 
+fromIndex :: Dict -> ID -> IO Word
+fromIndex (Dict _ dict unk) k = do 
     res <- H.lookup dict k
     case (res, unk) of
         (Just w, _)       -> return w
         (Nothing, Just w) -> return w
         _   -> error $ "Key out of range: " ++ show k
 
-fromWord :: Dict -> Word -> IO ID
-fromWord (Dict dict _ unk) k = do 
+fromString :: Dict -> Word -> IO ID
+fromString (Dict dict _ unk) k = do 
     res <- H.lookup dict k
     case (res, unk) of
-        (Just i, _)       -> return i
-        (Nothing, Just _) -> return 0
+        (Just i, _)        -> return i
+        (Nothing, Just k') -> fromJust <$> H.lookup dict k'
         _   -> error $ "Unknown key encountered: " ++ (show . T.unpack) k

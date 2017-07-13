@@ -9,13 +9,7 @@ module DyNet.Vector (
   -- Word,
   -- Vec(..),
   Vector(..),
-  (!),
-  constructor,
-  pushBack,
-  size,
-  debug,
-  insert,
-  fromList
+  Vectorizable(..)
 ) where
 
 import DyNet.Internal.Vector
