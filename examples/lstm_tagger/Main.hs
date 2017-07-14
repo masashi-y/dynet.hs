@@ -141,7 +141,7 @@ main' iter layers wembed hidden mlp trainData evalData = liftIO $ do
         vocab = foldl (\ws (w, c) -> if c > 5 then w:ws else ws) [] $ wordCount $ join trainX
         labels = nub $ join trainY
 
-    putStrLn $ "(layers, embed_dim, hidden_dim, mlp_dim) = " ++ show params
+    putStrLn $ "(layers,embed_dim,hidden_dim,mlp_dim) = " ++ show params
     putStrLn $ "vocabulary size: " ++ show (length vocab)
     putStrLn $ "number of labels: " ++ show (length labels)
 

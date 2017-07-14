@@ -18,6 +18,8 @@ import Prelude hiding ( concat )
 #include "dynet.h"
 
 
+-- This class enables "expressions" involved in computation graph
+-- construction be either Expression or (IO Expression) type.
 class IsExpr a where
     withExpr :: a -> (C2HSImp.Ptr Expression -> IO b) -> IO b
 
@@ -40,13 +42,14 @@ instance Sequence Float FloatVector where
 instance Sequence Word UIntVector where
     withSequence = withUIntVector
 
--- instance Sequence Word [Word] where
---      withSequence s f = fromList s >>= (\s' -> withUIntVector s' f)
-
 instance Integral a => Sequence Word [a] where
      withSequence s f = fromList (map fromIntegral s) >>= (\s' -> withUIntVector s' f)
 
-withExpList list f = fromList list >>= (\x -> withExpressionVector x f)
+instance Sequence Expression ExpressionVector where
+    withSequence = withExpressionVector
+
+instance Sequence Expression [Expression] where
+    withSequence s f = fromList s >>= (\s' -> withExpressionVector s' f)
 
 -- #################################################################
 -- ############################ Operations #########################
@@ -85,7 +88,7 @@ withExpList list f = fromList list >>= (\x -> withExpressionVector x f)
     {+S, `ComputationGraph', `LookupParameter'} -> `Expression' #} 
 
 -- lookup
-{#fun c_lookup as lookup
+{#fun c_lookup_0 as lookup
     {+S, `ComputationGraph', `LookupParameter', `Int'} -> `Expression' #} 
 
 -- lookup
@@ -331,7 +334,8 @@ add = op_add
 
 -- affine_transform
 {#fun c_affine_transform as affineTransform
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- inverse
 {#fun c_inverse as inverse
@@ -565,33 +569,40 @@ add = op_add
 
 -- average
 {#fun c_average as average
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- concatenate_cols
 {#fun c_concat_cols as concatCols
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- concatenate
 {#fun c_concat as concat
-    {+S,  withExpList* `[Expression]', `Int'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s', `Int'} -> `Expression' #} 
 
 concat' x = concat x 0
 
 -- concatenate_to_batch
 {#fun c_concat_to_batch as concatToBatch
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- sum
 {#fun c_sum as sum
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- max
 {#fun c_max as max
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- logsumexp
 {#fun c_logsumexp as logsumexp
-    {+S,  withExpList* `[Expression]'} -> `Expression' #} 
+    `Sequence Expression s' =>
+    {+S,  withSequence* `s'} -> `Expression' #} 
 
 -- max_dim
 {#fun c_max_dim as maxDim
