@@ -44,7 +44,7 @@ createBiLSTMTagger m vocab labels layers wembedDim hiddenDim mlpDim =
            <*> D.createDict labels Nothing
            <*> D.addLookupParameters m vocabSize [wembedDim]
            <*> D.addParameters m [mlpDim, hiddenDim*2]
-           <*> D.addParameters m [5, mlpDim]
+           <*> D.addParameters m [labelSize, mlpDim]
            <*> D.createVanillaLSTMBuilder layers wembedDim hiddenDim m False
            <*> D.createVanillaLSTMBuilder layers wembedDim hiddenDim m False
     where vocabSize = length vocab + 1
@@ -60,10 +60,7 @@ readData fileName = do
               _ -> error $ "Failed to parse the input: " ++ T.unpack t
 
 
-buildTaggingGraph :: D.ComputationGraph ->
-                     Tagger ->
-                     [Token] ->
-                     IO [D.Expression]
+buildTaggingGraph :: D.ComputationGraph -> Tagger -> [Token] -> IO [D.Expression]
 buildTaggingGraph cg (Tagger vocab _ wembed pH pO fwdRNN bwdRNN) input = do
     _H <- D.parameter cg pH
     _O <- D.parameter cg pO
@@ -87,8 +84,7 @@ buildTaggingGraph cg (Tagger vocab _ wembed pH pO fwdRNN bwdRNN) input = do
     return res
 
 
-sentLoss :: D.ComputationGraph ->
-            Tagger -> [Token] -> [Label] -> IO D.Expression
+sentLoss :: D.ComputationGraph -> Tagger -> [Token] -> [Label] -> IO D.Expression
 sentLoss cg tagger input ys = do
     exprs <- buildTaggingGraph cg tagger input
     errs <- forM (zip exprs ys) $ \(expr, y) -> do
@@ -141,18 +137,21 @@ main' :: O.Flag "" '["iter"] "ITER" "iteration" (O.Def "30" Int)
 main' iter layers wembed hidden mlp trainData evalData = liftIO $ do
     (trainX, trainY) <- readData (O.get trainData)
     (evalX, evalY) <- readData (O.get evalData)
-    let vocab = foldl (\ws (w, c) -> if c > 5 then w:ws else ws) [] $ wordCount $ join trainX
+    let params@(layers', wembed', hidden', mlp') = (O.get layers, O.get wembed, O.get hidden, O.get mlp)
+        vocab = foldl (\ws (w, c) -> if c > 5 then w:ws else ws) [] $ wordCount $ join trainX
         labels = nub $ join trainY
 
+    putStrLn $ "(layers, embed_dim, hidden_dim, mlp_dim) = " ++ show params
     putStrLn $ "vocabulary size: " ++ show (length vocab)
     putStrLn $ "number of labels: " ++ show (length labels)
 
     m <- D.createModel
     trainer <- D.createAdamTrainer' m
-    tagger <- createBiLSTMTagger m vocab labels (O.get layers) (O.get wembed) (O.get hidden) (O.get mlp)
+    tagger <- createBiLSTMTagger m vocab labels layers' wembed' hidden' mlp'
 
     let batchX = makeBatch 500 trainX
         batchY = makeBatch 500 trainY
+        evalCycle = min 8 (length batchX)
 
     forM_ [1..(O.get iter)] $  \_ ->
         forM_ (zip3 [1..] batchX batchY) $ \(i, xs, ys) -> do
@@ -160,9 +159,10 @@ main' iter layers wembed hidden mlp trainData evalData = liftIO $ do
             D.status trainer
             print loss
             D.updateEpoch trainer 1.0
-            when (i `mod` 8 == 0) $ do
+            when (i `mod` evalCycle == 0) $ do
                 predY <- mapM (tagSent tagger) evalX
                 putStrLn $ "accuracy: " ++ show (accuracy predY evalY)
+
 
 main = do
     argv <- getArgs
