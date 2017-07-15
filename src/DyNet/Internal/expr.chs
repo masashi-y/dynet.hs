@@ -154,31 +154,28 @@ instance Sequence Expression [Expression] where
     `(IsExpr ex1, IsExpr ex2)' =>
     {+S, withExpr* `ex1', withExpr* `ex2'} -> `Expression' #} 
 
-add :: (IsExpr ex1, IsExpr ex2) => ex1 -> ex2 -> IO Expression
-add = op_add
-
 -- operator+S
-{#fun c_op_scalar_add as op_scalar_add                                   -- TODO
+{#fun c_op_scalar_add as op_scalar_add
     `IsExpr ex' =>
     {+S, withExpr* `ex', `Float'} -> `Expression' #} 
 
 -- operator*
-{#fun c_op_mul as mul
+{#fun c_op_mul as op_mul
     `(IsExpr ex1, IsExpr ex2)' =>
     {+S, withExpr* `ex1', withExpr* `ex2'} -> `Expression' #} 
 
 -- operator*
-{#fun c_op_scalar_mul as op_scalar_mul                                   -- TODO
+{#fun c_op_scalar_mul as op_scalar_mul
     `IsExpr ex' =>
     {+S, withExpr* `ex', `Float'} -> `Expression' #} 
 
 -- operator/
-{#fun c_op_scalar_div as op_scalar_div                                   -- TODO
+{#fun c_op_scalar_div as op_scalar_div
     `IsExpr ex' =>
     {+S, withExpr* `ex', `Float'} -> `Expression' #} 
 
 -- operator-
-{#fun c_op_scalar_sub as op_scalar_sub                                   -- TODO
+{#fun c_op_scalar_sub as op_scalar_sub
     `IsExpr ex' =>
     {+S, `Float', withExpr* `ex'} -> `Expression' #} 
 

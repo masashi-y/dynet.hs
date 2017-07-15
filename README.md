@@ -13,7 +13,7 @@ To build C++ DyNet, please refer to https://dynet.readthedocs.io.
 ```shell
   git clone https://github.com/clab/dynet
   # Build this snapshot of DyNet following the instruction
-  cd dynet && git checkout  a77c0e6917528e5fad83a4e03f98ea7727f103c8
+  cd dynet && git checkout 2204e64fcfad6ad14425ab17317e30eaf915268d
   # clone dynet.hs to some other place
   git clone https://github.com/masashi-y/dynet.hs
   cd dynet.hs
@@ -24,22 +24,22 @@ To build C++ DyNet, please refer to https://dynet.readthedocs.io.
 
 ## Usage
 
-You can write in almost in the same manner as in C++ and Python versions.
+You can write in almost the same manner as in C++ and Python versions.
 
 Example code:
 ```haskell
 import DyNet.Core
 import DyNet.Trainer -- SGD, AdaGrad, Adam etc.
 import DyNet.Expr -- operations: input, mul, logistic
-import qualified DyNet.Vector as V -- wrapper for stl vector
+import qualified DyNet.Vector as V -- wrapper for C++ STL vector
 
--- All functions are IO actions
 main = do
     -- Initialization function in DyNet
-    -- Functions with default args are marked with prime (')
     initialize' ["--dynet-seed", "1"] -- command line args
     m <- createModel
-    sgd <- createSimpleSGDTrainer' m  -- SGD
+    -- Functions with default args are marked with prime (')
+    -- createSimpleSGDTrainer' m = createSimpleSGDTrainer m 0.1 0.0
+    sgd <- createSimpleSGDTrainer' m
     -- Use withNewComputationGraph function to
     -- ensure that there is only one CG at a time
     -- (which is required by DyNet).

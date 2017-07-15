@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module DyNet.Expr (
     input,
@@ -20,11 +22,9 @@ module DyNet.Expr (
     flipGradient,
     neg,
     add,
-    op_scalar_add,
     mul,
-    op_scalar_mul,
-    op_scalar_div,
-    op_scalar_sub,
+    div,
+    sub,
     cdiv,
     cmult,
     colwiseAdd,
@@ -117,7 +117,32 @@ module DyNet.Expr (
 ) where
 
 import Prelude hiding ( tanh, concat, sum, lookup,
-                        exp, sqrt, abs, log, max )
+                        exp, sqrt, abs, log, max, div )
 import DyNet.Internal.Expr
+import DyNet.Core
 
+
+class DyNum a b where
+    add :: a -> b -> IO Expression
+    mul :: a -> b -> IO Expression
+    div :: a -> b -> IO Expression
+    sub :: a -> b -> IO Expression
+
+instance (IsExpr e1, IsExpr e2) => DyNum e1 e2 where
+    add = op_add
+    mul = op_mul
+    div _ _ = error $ "no implementation"
+    sub x y = x `op_add` (neg y)
+
+instance IsExpr e => DyNum e Float where
+    add = op_scalar_add
+    mul = op_scalar_mul
+    div = op_scalar_div
+    sub x y = neg (y `op_scalar_sub` x)
+
+instance IsExpr e => DyNum Float e where
+    add = flip op_scalar_add
+    mul = flip op_scalar_mul
+    div _ _ = error $ "no implementation"
+    sub = op_scalar_sub
 
