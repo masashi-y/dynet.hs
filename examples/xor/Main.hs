@@ -8,7 +8,7 @@ import qualified DyNet.Vector as V
 
 main = do
     let hiddenSize = 8
-        iteration = 300
+        iteration = 30
     argv <- getArgs
     D.initialize' argv
     m <- D.createModel

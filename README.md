@@ -1,8 +1,8 @@
 # DyNet.hs
 
-## Build
+Haskell binding for [DyNet](https://github.com/clab/dynet).
 
-Haskell binding for [DyNet](https://github.com/clab/dynet)
+## Build
 
 #### Requirements
 - C++ build environment for DyNet
@@ -24,22 +24,25 @@ To build C++ DyNet, please refer to https://dynet.readthedocs.io.
 
 ## Usage
 
+You can write in almost in the same manner as in C++ and Python versions.
+
 Example code:
 ```haskell
 import DyNet.Core
 import DyNet.Trainer -- SGD, AdaGrad, Adam etc.
-import DyNet.Expr -- operations e.g. input, mul logistic
+import DyNet.Expr -- operations: input, mul, logistic
 import qualified DyNet.Vector as V -- wrapper for stl vector
 
--- all functions are IO actions
+-- All functions are IO actions
 main = do
-    -- initialization function in DyNet
-    -- functions with default args are marked with prime (')
-    initialize' []
+    -- Initialization function in DyNet
+    -- Functions with default args are marked with prime (')
+    initialize' ["--dynet-seed", "1"] -- command line args
     m <- createModel
     sgd <- createSimpleSGDTrainer' m  -- SGD
     -- Use withNewComputationGraph function to
-    -- ensure that there is only one CG at a time.
+    -- ensure that there is only one CG at a time
+    -- (which is required by DyNet).
     withNewComputationGraph $ \cg -> do
         -- parameter matrix with 1 x 3 shape
         pW <- addParameters m [1, 3]
@@ -70,4 +73,4 @@ main = do
         update sgd 1.0
 ```
 
-Example programs are available in `examples` directory.
+Other example programs are available in `examples` directory.
