@@ -158,7 +158,7 @@ void VanillaLSTMBuilder_set_dropout(CVanillaLSTMBuilder* rnn, float d) {
         set_dropout(d);
 }
 
-void VanillaLSTMBuilder_set_dropout(CVanillaLSTMBuilder* rnn, float d, float d_r) {
+void VanillaLSTMBuilder_set_dropout_rate(CVanillaLSTMBuilder* rnn, float d, float d_r) {
     reinterpret_cast<VanillaLSTMBuilder*>(rnn)->
         set_dropout(d, d_r);
 }
@@ -199,7 +199,7 @@ void CoupledLSTMBuilder_set_dropout(CCoupledLSTMBuilder* rnn, float d) {
         set_dropout(d);
 }
 
-void CoupledLSTMBuilder_set_dropout(CCoupledLSTMBuilder* rnn, float d, float d_r, float d_c) {
+void CoupledLSTMBuilder_set_dropout_rate(CCoupledLSTMBuilder* rnn, float d, float d_r, float d_c) {
     reinterpret_cast<CoupledLSTMBuilder*>(rnn)->
         set_dropout(d, d_r, d_c);
 }
