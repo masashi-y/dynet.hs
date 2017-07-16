@@ -16,6 +16,7 @@ module DyNet.Train (
     createAdamTrainer,
     createAdamTrainer',
     update,
+    update',
     updateEpoch,
     clipGradient,
     rescaleAndResetWeightDecay,
@@ -44,3 +45,6 @@ createRMSPropTrainer' m = createRMSPropTrainer m 0.1 1.0e-20 0.95 0.0
 
 -- e0 = 0.001,  beta_1 = 0.9,  beta_2 = 0.999,  eps = 1e-8,  edecay = 0.0
 createAdamTrainer' m = createAdamTrainer m 0.001 0.9 0.999 1.0e-8 0.0
+
+update' :: Trainer t => t -> IO ()
+update' trainer = update trainer 1.0

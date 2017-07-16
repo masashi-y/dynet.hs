@@ -18,7 +18,20 @@ module DyNet.Core (
     backward,
     initialize,
     initialize',
-    argmax
+    argmax,
+    Debug(..),
+    dim,
+    dimSize,
+    dimBatchElems,
+    dimSumDims,
+    dimTruncate,
+    dimResize,
+    dimNdims,
+    dimRows,
+    dimCols,
+    dimAt,
+    dimSet,
+    dimTranspose,
 ) where
 
 import DyNet.Internal.Core
@@ -33,9 +46,19 @@ withNewComputationGraph :: (ComputationGraph -> IO a) -> IO a
 withNewComputationGraph f = do
     cg@(ComputationGraph ptr) <- createComputationGraph
     res <- f cg
-    deleteComputationGraph cg
+    -- deleteComputationGraph cg
     return res
 
 argmax :: [Float] -> Int
 argmax list = fst $ maximumBy (\(_, m) (_, n) -> compare m n) $ zip [0..] list
+
+class Debug a where
+    printC :: a -> IO ()
+
+instance Debug Dim where
+    printC = dimDebug
+
+instance Debug Tensor where
+    printC = tensorDebug
+
 

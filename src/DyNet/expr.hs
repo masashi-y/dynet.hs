@@ -119,6 +119,7 @@ module DyNet.Expr (
 import Prelude hiding ( tanh, concat, sum, lookup,
                         exp, sqrt, abs, log, max, div )
 import DyNet.Internal.Expr
+import DyNet.Internal.Core
 import DyNet.Core
 
 
