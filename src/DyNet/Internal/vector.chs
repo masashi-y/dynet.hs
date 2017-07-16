@@ -1,5 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 
 module DyNet.Internal.Vector where
@@ -49,6 +51,29 @@ class Vectorizable a where
 
     fromList :: [a] -> IO (Vector a)
     fromList list = constructor list (length list)
+
+-- This class enables any sequence type (e.g. [Int] IntVector)
+-- to be passed as the std::vector<int> argument of dynet operations
+class Sequence t s where
+    withSequence :: s -> (C2HSImp.Ptr (Vector t) -> IO b) -> IO b
+
+instance Sequence Float [Float] where
+    withSequence s f = fromList s >>= (\s' -> withFloatVector s' f)
+
+instance Sequence Float FloatVector where
+    withSequence = withFloatVector
+
+instance Sequence Word UIntVector where
+    withSequence = withUIntVector
+
+instance Integral a => Sequence Word [a] where
+     withSequence s f = fromList (map fromIntegral s) >>= (\s' -> withUIntVector s' f)
+
+instance Sequence Int64 LongVector where
+    withSequence = withLongVector
+
+instance Integral a => Sequence Int64 [a] where
+    withSequence s f = fromList (map fromIntegral s) >>= (\s' -> withLongVector s' f)
 
 
 -- ######################################################

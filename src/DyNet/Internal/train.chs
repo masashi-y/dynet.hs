@@ -109,65 +109,51 @@ instance Trainer AdamTrainer where
 
 
 instance Storable SimpleSGDTrainer where
-    sizeOf _ = fromIntegral $ sizeOfSimpleSGDTrainer
+    sizeOf _ = sizeOfSimpleSGDTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable CyclicalSGDTrainer where
-    sizeOf _ = fromIntegral $ sizeOfCyclicalSGDTrainer
+    sizeOf _ = sizeOfCyclicalSGDTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable MomentumSGDTrainer where
-    sizeOf _ = fromIntegral $ sizeOfMomentumSGDTrainer
+    sizeOf _ = sizeOfMomentumSGDTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable AdagradTrainer where
-    sizeOf _ = fromIntegral $ sizeOfAdagradTrainer
+    sizeOf _ = sizeOfAdagradTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable AdadeltaTrainer where
-    sizeOf _ = fromIntegral $ sizeOfAdadeltaTrainer
+    sizeOf _ = sizeOfAdadeltaTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable RMSPropTrainer where
-    sizeOf _ = fromIntegral $ sizeOfRMSPropTrainer
+    sizeOf _ = sizeOfRMSPropTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable AdamTrainer where
-    sizeOf _ = fromIntegral $ sizeOfAdamTrainer
+    sizeOf _ = sizeOfAdamTrainer
     alignment _ = 4
     peek = undefined
     poke = undefined
 
-foreign import ccall "size_of_SimpleSGDTrainer"
-    sizeOfSimpleSGDTrainer :: CInt
-
-foreign import ccall "size_of_CyclicalSGDTrainer"
-    sizeOfCyclicalSGDTrainer :: CInt
-
-foreign import ccall "size_of_MomentumSGDTrainer"
-    sizeOfMomentumSGDTrainer :: CInt
-
-foreign import ccall "size_of_AdagradTrainer"
-    sizeOfAdagradTrainer :: CInt
-
-foreign import ccall "size_of_AdadeltaTrainer"
-    sizeOfAdadeltaTrainer :: CInt
-
-foreign import ccall "size_of_RMSPropTrainer"
-    sizeOfRMSPropTrainer :: CInt
-
-foreign import ccall "size_of_AdamTrainer"
-    sizeOfAdamTrainer :: CInt
-
+{#fun pure size_of_SimpleSGDTrainer as ^ {} -> `Int' #}
+{#fun pure size_of_CyclicalSGDTrainer as ^ {} -> `Int' #}
+{#fun pure size_of_MomentumSGDTrainer as ^ {} -> `Int' #}
+{#fun pure size_of_AdagradTrainer as ^ {} -> `Int' #}
+{#fun pure size_of_AdadeltaTrainer as ^ {} -> `Int' #}
+{#fun pure size_of_RMSPropTrainer as ^ {} -> `Int' #}
+{#fun pure size_of_AdamTrainer as ^ {} -> `Int' #}

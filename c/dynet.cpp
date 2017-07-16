@@ -45,10 +45,18 @@ int Dim_size(CDim* d) {
     return reinterpret_cast<Dim*>(d)->size();
 }
 
-// CDim* Dim_truncate(CDim* d) {
-// return reinterpret_cast<Dim*>(d)->truncate();
-// }
-//
+unsigned int Dim_batch_elems(CDim* d) {
+    return reinterpret_cast<Dim*>(d)->batch_elems();
+}
+
+int Dim_sum_dims(CDim* d) {
+    return reinterpret_cast<Dim*>(d)->sum_dims();
+}
+
+void Dim_truncate(CDim* d, CDim* out) {
+    *reinterpret_cast<Dim*>(out) = reinterpret_cast<Dim*>(d)->truncate();
+}
+
 void Dim_resize(CDim* d, unsigned i) {
     return reinterpret_cast<Dim*>(d)->resize(i);
 }
@@ -77,14 +85,13 @@ void delete_Dim(CDim* d) {
     reinterpret_cast<Dim*>(d)->~Dim();
 }
 
-// int Dim_size(CDim* d, unsigned i) {
-// return reinterpret_cast<Dim*>(d)->size(i);
-// }
-//
-// CDim* Dim_transpose(CDim* d) {
-// return reinterpret_cast<Dim*>(d)->transpose();
-// }
-//
+void Dim_transpose(CDim* d, CDim* out) {
+    *reinterpret_cast<Dim*>(out) = reinterpret_cast<Dim*>(d)->transpose();
+}
+
+void Dim_debug(CDim* d) {
+    cerr << *reinterpret_cast<Dim*>(d);
+}
 
 unsigned size_of_Model() {
     return sizeof(ParameterCollection);
@@ -176,9 +183,18 @@ void delete_Tensor(CTensor* t) {
     reinterpret_cast<Tensor*>(t)->~Tensor();
 }
 
+void Tensor_debug(CTensor* t) {
+    cerr << *reinterpret_cast<Tensor*>(t);
+}
+
+ComputationGraph* _cg = nullptr;
+
 
 CComputationGraph* new_ComputationGraph() {
-    return reinterpret_cast<CComputationGraph*>(new ComputationGraph());
+    if (_cg != nullptr)
+        delete _cg;
+    _cg = new ComputationGraph();
+    return reinterpret_cast<CComputationGraph*>(_cg);
 }
 
 void init_ComputationGraph(CComputationGraph* g) {
@@ -213,3 +229,29 @@ void c_as_vector(FloatVector* out, const CTensor* t) {
     new (out) std::vector<float>(
         as_vector(*reinterpret_cast<const Tensor*>(t)));
 }
+
+const CTensor* ComputationGraph_incremental_forward(CComputationGraph* g, CExpression* last) {
+    const Tensor* res = &reinterpret_cast<ComputationGraph*>(g)->
+        incremental_forward(*reinterpret_cast<Expression*>(last));
+    return reinterpret_cast<const CTensor*>(res);
+}
+void ComputationGraph_invalidate(CComputationGraph* g) {
+    reinterpret_cast<ComputationGraph*>(g)->invalidate();
+}
+
+void ComputationGraph_clear(CComputationGraph* g) {
+    reinterpret_cast<ComputationGraph*>(g)->clear();
+}
+void ComputationGraph_checkpoint(CComputationGraph* g) {
+    reinterpret_cast<ComputationGraph*>(g)->checkpoint();
+}
+
+void ComputationGraph_revert(CComputationGraph* g) {
+    reinterpret_cast<ComputationGraph*>(g)->revert();
+}
+
+void ComputationGraph_get_dimension(CComputationGraph* g, CDim* out, int index) {
+    Dim& res = reinterpret_cast<ComputationGraph*>(g)->get_dimension(index);
+    *reinterpret_cast<Dim*>(out) = res;
+}
+

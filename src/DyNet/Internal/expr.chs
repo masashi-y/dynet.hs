@@ -1,7 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 module DyNet.Internal.Expr where
@@ -13,6 +11,7 @@ module DyNet.Internal.Expr where
 import qualified Foreign.Ptr as C2HSImp
 import Foreign.Storable
 import Prelude hiding ( concat )
+import Data.Int ( Int64(..) )
 ---import DyNet.Vector
 
 #include "dynet.h"
@@ -20,36 +19,6 @@ import Prelude hiding ( concat )
 
 -- This class enables "expressions" involved in computation graph
 -- construction be either Expression or (IO Expression) type.
-class IsExpr a where
-    withExpr :: a -> (C2HSImp.Ptr Expression -> IO b) -> IO b
-
-instance IsExpr Expression where
-    withExpr = withExpression
-
-instance IsExpr (IO Expression) where
-    withExpr exp g = exp >>= (\x -> withExpression x g)
-
-
-class Sequence t s where
-    withSequence :: s -> (C2HSImp.Ptr (Vector t) -> IO b) -> IO b
-
-instance Sequence Float [Float] where
-    withSequence s f = fromList s >>= (\s' -> withFloatVector s' f)
-
-instance Sequence Float FloatVector where
-    withSequence = withFloatVector
-
-instance Sequence Word UIntVector where
-    withSequence = withUIntVector
-
-instance Integral a => Sequence Word [a] where
-     withSequence s f = fromList (map fromIntegral s) >>= (\s' -> withUIntVector s' f)
-
-instance Sequence Expression ExpressionVector where
-    withSequence = withExpressionVector
-
-instance Sequence Expression [Expression] where
-    withSequence s f = fromList s >>= (\s' -> withExpressionVector s' f)
 
 -- #################################################################
 -- ############################ Operations #########################
@@ -61,15 +30,15 @@ instance Sequence Expression [Expression] where
 
 -- input
 {#fun c_input_1 as input
-    `(Sequence Float s, Integral d)' =>
-    {+S, `ComputationGraph', withDim* `[d]', withSequence* `s'} -> `Expression' #} 
+    `(Sequence Float s, Dimension d)' =>
+    {+S, `ComputationGraph', withDimension* `d', withSequence* `s'} -> `Expression' #} 
 
 -- input
 {#fun c_input_2 as input''
-    `(Integral d, Sequence Word s1, Sequence Float s2)' =>
+    `(Dimension d, Sequence Word s1, Sequence Float s2)' =>
     {+S,
      `ComputationGraph',
-      withDim* `[d]', withSequence* `s1', withSequence* `s2', `Float'} -> `Expression' #} 
+      withDimension* `d', withSequence* `s1', withSequence* `s2', `Float'} -> `Expression' #} 
 
 -- parameter
 {#fun c_parameter as parameter
@@ -111,28 +80,28 @@ instance Sequence Expression [Expression] where
 
 -- zeroes
 {#fun c_zeroes as zeroes
-    `Integral d' =>
-    {+S, `ComputationGraph', withDim* `[d]'} -> `Expression' #} 
+    `Dimension d' =>
+    {+S, `ComputationGraph', withDimension* `d'} -> `Expression' #} 
 
 -- random_normal
 {#fun c_random_normal as randomNormal
-    `Integral d' =>
-    {+S, `ComputationGraph', withDim* `[d]'} -> `Expression' #} 
+    `Dimension d' =>
+    {+S, `ComputationGraph', withDimension* `d'} -> `Expression' #} 
 
 -- random_bernoulli
 {#fun c_random_bernoulli as randomBernoulli
-    `Integral d' =>
-    {+S, `ComputationGraph', withDim* `[d]', `Float', `Float'} -> `Expression' #} 
+    `Dimension d' =>
+    {+S, `ComputationGraph', withDimension* `d', `Float', `Float'} -> `Expression' #} 
 
 -- random_uniform
 {#fun c_random_uniform as randomUniform
-    `Integral d' =>
-    {+S, `ComputationGraph', withDim* `[d]', `Float', `Float'} -> `Expression' #} 
+    `Dimension d' =>
+    {+S, `ComputationGraph', withDimension* `d', `Float', `Float'} -> `Expression' #} 
 
 -- random_gumbel
 {#fun c_random_gumbel as randomGumbel
-    `Integral d' =>
-    {+S, `ComputationGraph', withDim* `[d]', `Float', `Float'} -> `Expression' #} 
+    `Dimension d' =>
+    {+S, `ComputationGraph', withDimension* `d', `Float', `Float'} -> `Expression' #} 
 
 -- nobackprop
 {#fun c_nobackprop as nobackprop
@@ -321,8 +290,8 @@ instance Sequence Expression [Expression] where
 
 -- reshape
 {#fun c_reshape as reshape
-    `(IsExpr ex, Integral d)' =>
-    {+S, withExpr* `ex', withDim* `[d]'} -> `Expression' #} 
+    `(IsExpr ex, Dimension d)' =>
+    {+S, withExpr* `ex', withDimension* `d'} -> `Expression' #} 
 
 -- transpose
 {#fun c_transpose as transpose

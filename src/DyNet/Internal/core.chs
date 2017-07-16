@@ -1,3 +1,7 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module DyNet.Internal.Core where
 
@@ -19,9 +23,6 @@ import DyNet.Vector
 
 #include "dynet.h"
 
--- type Dim = [Int64]
-withDim d f = dim d >>= flip withHDim f
-
 {#pointer *CModel as Model
     foreign finalizer delete_Model newtype #}
 
@@ -37,29 +38,28 @@ withDim d f = dim d >>= flip withHDim f
 {#pointer *CTensor as Tensor
     foreign finalizer delete_Tensor newtype #}
 
-{#pointer *CComputationGraph as ComputationGraph
-    foreign finalizer doNothing newtype #}
+{#pointer *CComputationGraph as ComputationGraph newtype #}
 
-{#pointer *CDim as HDim
+{#pointer *CDim as Dim
     foreign finalizer delete_Dim newtype #}
 
 {#fun init_Model as createModel
     {+S} -> `Model' #}
 
-{#fun init_ComputationGraph as createComputationGraph
-    {+S} -> `ComputationGraph' #}
+{#fun new_ComputationGraph as createComputationGraph
+    {} -> `ComputationGraph' #}
 
 {#fun c_as_scalar as asScalar {`Tensor'} -> `Float' #}
 
 {#fun c_as_vector as asVector {+S, `Tensor'} -> `FloatVector' #}
 
 {#fun Model_add_parameters as addParameters
-    `Integral d' =>
-    {`Model', +S, withDim* `[d]'} -> `Parameter' #}
+    `Dimension d' =>
+    {`Model', +S, withDimension* `d'} -> `Parameter' #}
 
 {#fun Model_add_lookup_parameters as addLookupParameters
-    `Integral d' =>
-    {`Model', +S, `Int', withDim* `[d]'} -> `LookupParameter' #}
+    `Dimension d' =>
+    {`Model', +S, `Int', withDimension* `d'} -> `LookupParameter' #}
 
 {#fun ComputationGraph_print_graphviz as printGraphviz
     {`ComputationGraph'} -> `()' #} 
@@ -82,42 +82,133 @@ notDelete x = newForeignPtr deleteNothing x >>= (return . Tensor)
     {`ComputationGraph',
      `Expression'} -> `()' #} 
 
+{#fun ComputationGraph_incremental_forward as incrementalForward
+    {`ComputationGraph',
+     `Expression'} -> `Tensor' notDelete* #} 
+
+{#fun ComputationGraph_invalidate as invalidate
+    {`ComputationGraph'} -> `()' #}
+
+{#fun ComputationGraph_clear as clear
+    {`ComputationGraph'} -> `()' #}
+
+{#fun ComputationGraph_checkpoint as checkpoint
+    {`ComputationGraph'} -> `()' #}
+
+{#fun ComputationGraph_revert as revert
+    {`ComputationGraph'} -> `()' #}
+
+-- {#fun ComputationGraph_get_dimension as getDimension
+--     {`ComputationGraph', +S, `Int'} -> `Dim' notDelete* #}
+
 instance Storable Model where
-    sizeOf _ = fromIntegral $ sizeOfModel
+    sizeOf _ = sizeOfModel
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable ComputationGraph where
-    sizeOf _ = fromIntegral $ sizeOfComputationGraph
+    sizeOf _ = sizeOfComputationGraph
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable Parameter where
-    sizeOf _ = fromIntegral $ sizeOfParameter
+    sizeOf _ = sizeOfParameter
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable LookupParameter where
-    sizeOf _ = fromIntegral $ sizeOfLookupParameter
+    sizeOf _ = sizeOfLookupParameter
     alignment _ = 4
     peek = undefined
     poke = undefined
 
 instance Storable Expression where
-    sizeOf _ = fromIntegral $ sizeOfExpression
+    sizeOf _ = sizeOfExpression
     alignment _ = 4
     peek = undefined
     poke = undefined
 
-{#fun new_Dim_v as ^ {`LongVector'} -> `HDim' #}
-{#fun Dim_size as ^ {`HDim'} -> `Int' #}
+instance Storable Dim where
+    sizeOf _ = sizeOfDim
+    alignment _ = 4
+    peek = undefined
+    poke = undefined
 
-dim :: Integral a => [a] -> IO HDim
-dim list = fromList (map fromIntegral list) >>= newDimV
 
+
+{#fun Tensor_debug as ^ {`Tensor'} -> `()' #}
+
+
+class IsExpr a where
+    withExpr :: a -> (C2HSImp.Ptr Expression -> IO b) -> IO b
+
+instance IsExpr Expression where
+    withExpr = withExpression
+
+instance IsExpr (IO Expression) where
+    withExpr exp g = exp >>= (\x -> withExpression x g)
+
+
+class Dimension d where
+    withDimension :: d -> (Ptr Dim -> IO a) -> IO a
+
+instance Dimension Dim where
+    withDimension = withDim
+
+instance Dimension (IO Dim) where
+    withDimension d f = d >>= (\d' -> withDim d' f)
+
+instance Sequence Int64 d => Dimension d where
+    withDimension d f = initDimV d >>= (\d' -> withDim d' f)
+
+{#fun init_Dim_v as ^
+    `Sequence Int64 s' =>
+    {+S, withSequence* `s'} -> `Dim' #}
+
+{#fun init_Dim_v_int as dim
+    `Sequence Int64 s' =>
+    {+S, withSequence* `s', `Int'} -> `Dim' #}
+
+{#fun Dim_size as ^ {`Dim'} -> `Int' #}
+
+{#fun Dim_batch_elems as ^
+    {`Dim'} -> `()' #}
+
+{#fun Dim_sum_dims as ^
+    {`Dim'} -> `Int' #}
+
+{#fun Dim_truncate as ^
+    {`Dim', +S} -> `Dim' #}
+
+{#fun Dim_resize as ^
+    `Integral a' =>
+    {`Dim', fromIntegral `a'} -> `()' #}
+
+{#fun Dim_ndims as ^
+    {`Dim'} -> `Int' #}
+
+{#fun Dim_rows as ^
+    {`Dim'} -> `Int' #}
+
+{#fun Dim_cols as ^
+    {`Dim'} -> `Int' #}
+
+{#fun Dim_at as ^
+    `Integral a' =>
+    {`Dim', fromIntegral `a'} -> `Int' #}
+
+{#fun Dim_set as ^
+    `(Integral a1, Integral a2)' =>
+    {`Dim', fromIntegral `a1', fromIntegral `a2'} -> `()' #}
+
+{#fun Dim_transpose as ^
+    {`Dim', +S} -> `Dim' #}
+
+{#fun Dim_debug as ^
+    {`Dim'} -> `()' #}
 
 initialize :: [String] -> Bool -> IO [String]
 initialize argv shared_parameters = do
@@ -137,14 +228,11 @@ initialize argv shared_parameters = do
 
 foreign import ccall "dynet_initialize"
     dynetInitialize :: Ptr CInt -> Ptr (Ptr CChar) -> Bool -> IO ()
-foreign import ccall "size_of_Model"
-    sizeOfModel :: CInt
-foreign import ccall "size_of_ComputationGraph"
-    sizeOfComputationGraph :: CInt
-foreign import ccall "size_of_Parameter"
-    sizeOfParameter :: CInt
-foreign import ccall "size_of_LookupParameter"
-    sizeOfLookupParameter :: CInt
-foreign import ccall "size_of_Expression"
-    sizeOfExpression :: CInt
+
+{#fun pure size_of_Model as ^ {} -> `Int' #}
+{#fun pure size_of_ComputationGraph as ^ {} -> `Int' #}
+{#fun pure size_of_Parameter as ^ {} -> `Int' #}
+{#fun pure size_of_LookupParameter as ^ {} -> `Int' #}
+{#fun pure size_of_Expression as ^ {} -> `Int' #}
+{#fun pure size_of_Dim as ^ {} -> `Int' #}
 

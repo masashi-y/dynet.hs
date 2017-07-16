@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 
 module DyNet.Internal.RNN where
 
@@ -8,6 +9,7 @@ module DyNet.Internal.RNN where
 -- import qualified Foreign.Ptr as C2HSImp
 import Foreign.Storable
 import Foreign.Ptr
+import Foreign.ForeignPtr ( castForeignPtr )
 import Foreign.C.Types ( CInt )
 
 #include "rnn.h"
@@ -35,20 +37,45 @@ class RNN a where
     castRNN :: a -> (Ptr RNNBuilder -> IO b) -> IO b
     castRNN t f = withRNN t (f . castPtr)
 
+    setDropout :: a -> Float -> IO ()
+    setDropoutRate :: a -> Float -> Float -> Float -> IO ()
+    disableDropout :: a -> IO ()
+    setDropoutMasks :: a -> Int -> IO ()
+
 instance RNN SimpleRNNBuilder where
     withRNN = withSimpleRNNBuilder
+    setDropout (SimpleRNNBuilder rnn) r = rNNBuilderSetDropout (RNNBuilder $ castForeignPtr rnn) r
+    setDropoutRate = error "no implementation"
+    disableDropout (SimpleRNNBuilder rnn) = rNNBuilderDisableDropout (RNNBuilder $ castForeignPtr rnn)
+    setDropoutMasks = error "no implementation"
 
 instance RNN VanillaLSTMBuilder where
     withRNN = withVanillaLSTMBuilder
+    setDropout = vanillaLSTMBuilderSetDropout
+    setDropoutRate d dr _ = vanillaLSTMBuilderSetDropoutRate d dr
+    disableDropout = vanillaLSTMBuilderDisableDropout
+    setDropoutMasks = vanillaLSTMBuilderSetDropoutMasks
 
 instance RNN CoupledLSTMBuilder where
     withRNN = withCoupledLSTMBuilder
+    setDropout = coupledLSTMBuilderSetDropout
+    setDropoutRate = coupledLSTMBuilderSetDropoutRate
+    disableDropout = coupledLSTMBuilderDisableDropout
+    setDropoutMasks = coupledLSTMBuilderSetDropoutMasks
 
 instance RNN FastLSTMBuilder where
     withRNN = withFastLSTMBuilder
+    setDropout (FastLSTMBuilder rnn) r = rNNBuilderSetDropout (RNNBuilder $ castForeignPtr rnn) r
+    setDropoutRate = error "no implementation"
+    disableDropout (FastLSTMBuilder rnn) = rNNBuilderDisableDropout (RNNBuilder $ castForeignPtr rnn)
+    setDropoutMasks = error "no implementation"
 
 instance RNN GRUBuilder where
     withRNN = withGRUBuilder
+    setDropout (GRUBuilder rnn) r = rNNBuilderSetDropout (RNNBuilder $ castForeignPtr rnn) r
+    setDropoutRate = error "no implementation"
+    disableDropout (GRUBuilder rnn) = rNNBuilderDisableDropout (RNNBuilder $ castForeignPtr rnn)
+    setDropoutMasks = error "no implementation"
 
 
 {#fun state as state
@@ -60,24 +87,24 @@ instance RNN GRUBuilder where
     {castRNN* `r', `ComputationGraph', `Bool'} -> `()' #}
 
 {#fun RNNBuilder_start_new_sequence as startNewSequence
-    `RNN r' =>
-    {castRNN* `r', `ExpressionVector'} -> `()' #}
+    `(RNN r, Sequence Expression s)' =>
+    {castRNN* `r', withSequence* `s'} -> `()' #}
 
 {#fun RNNBuilder_set_h as set_h
-    `RNN r' =>
-    {castRNN* `r', +S, `Int', `ExpressionVector'} -> `Expression' #}
+    `(RNN r, Sequence Expression s)' =>
+    {castRNN* `r', +S, `Int', withSequence* `s'} -> `Expression' #}
 
 {#fun RNNBuilder_set_s as set_s
-    `RNN r' =>
-    {castRNN* `r', +S, `Int', `ExpressionVector'} -> `Expression' #}
+    `(RNN r, Sequence Expression s)' =>
+    {castRNN* `r', +S, `Int', withSequence* `s'} -> `Expression' #}
 
 {#fun RNNBuilder_add_input as addInput
-    `RNN r' =>
-    {castRNN* `r', +S, `Expression'} -> `Expression' #}
+    `(RNN r, IsExpr ex)' =>
+    {castRNN* `r', +S, withExpr* `ex'} -> `Expression' #}
 
 {#fun RNNBuilder_add_input_prev as addInputPrev
-    `RNN r' =>
-    {castRNN* `r', +S, `Int', `Expression'} -> `Expression' #}
+    `(RNN r, IsExpr ex)' =>
+    {castRNN* `r', +S, `Int', withExpr* `ex'} -> `Expression' #}
 
 {#fun RNNBuilder_rewind_one_step as rewindOneStep
     `RNN r' =>
@@ -87,13 +114,11 @@ instance RNN GRUBuilder where
     `RNN r' =>
     {castRNN* `r', `Int'} -> `()' #}
 
-{#fun RNNBuilder_set_dropout as setDropout
-    `RNN r' =>
-    {castRNN* `r', `Float'} -> `()' #}
+{#fun RNNBuilder_set_dropout as ^
+    {`RNNBuilder', `Float'} -> `()' #}
 
-{#fun RNNBuilder_disable_dropout as disableDropout
-    `RNN r' =>
-    {castRNN* `r'} -> `()' #}
+{#fun RNNBuilder_disable_dropout as ^
+    {`RNNBuilder'} -> `()' #}
 
 {#fun RNNBuilder_back as back
     `RNN r' =>
@@ -134,7 +159,8 @@ instance RNN GRUBuilder where
 {#fun pure size_of_SimpleRNNBuilder as ^ {} -> `Int' #}
 
 {#fun SimpleRNNBuilder_add_auxiliary_input as addAuxiliaryInput
-    {`SimpleRNNBuilder', +S, `Expression', `Expression'} -> `Expression' #}
+    `(IsExpr ex1, IsExpr ex2)' =>
+    {`SimpleRNNBuilder', +S, withExpr* `ex1', withExpr* `ex2'} -> `Expression' #}
 
 
 
@@ -144,20 +170,36 @@ instance RNN GRUBuilder where
 
 {#fun pure size_of_VanillaLSTMBuilder as ^ {} -> `Int' #}
 
--- void VanillaLSTMBuilder_set_dropout(CVanillaLSTMBuilder* rnn, float d);
--- void VanillaLSTMBuilder_set_dropout_rate(CVanillaLSTMBuilder* rnn, float d, float d_r);
--- void VanillaLSTMBuilder_disable_dropout(CVanillaLSTMBuilder* rnn);
--- void VanillaLSTMBuilder_set_dropout_masks(CVanillaLSTMBuilder* rnn, unsigned batch_size);
+{#fun VanillaLSTMBuilder_set_dropout as ^
+    {`VanillaLSTMBuilder', `Float'} -> `()' #}
+
+{#fun VanillaLSTMBuilder_set_dropout_rate as ^
+    {`VanillaLSTMBuilder', `Float', `Float'} -> `()' #}
+
+{#fun VanillaLSTMBuilder_disable_dropout as ^
+    {`VanillaLSTMBuilder'} -> `()' #}
+
+{#fun VanillaLSTMBuilder_set_dropout_masks as ^
+    {`VanillaLSTMBuilder', `Int'} -> `()' #}
+
 
 {#fun init_CoupledLSTMBuilder as createCoupledLSTMBuilder
     {+S, `Int', `Int', `Int', `Model'} -> `CoupledLSTMBuilder' #}
 
 {#fun pure size_of_CoupledLSTMBuilder as ^ {} -> `Int' #}
 
--- void CoupledLSTMBuilder_set_dropout(CCoupledLSTMBuilder* rnn, float d);
--- void CoupledLSTMBuilder_set_dropout_rate(CCoupledLSTMBuilder* rnn, float d, float d_r, float d_c);
--- void CoupledLSTMBuilder_disable_dropout(CCoupledLSTMBuilder* rnn);
--- void CoupledLSTMBuilder_set_dropout_masks(CCoupledLSTMBuilder* rnn, unsigned batch_size);
+{#fun CoupledLSTMBuilder_set_dropout as ^
+    {`CoupledLSTMBuilder', `Float'} -> `()' #}
+
+{#fun CoupledLSTMBuilder_set_dropout_rate as ^
+    {`CoupledLSTMBuilder', `Float', `Float', `Float'} -> `()' #}
+
+{#fun CoupledLSTMBuilder_disable_dropout as ^
+    {`CoupledLSTMBuilder'} -> `()' #}
+
+{#fun CoupledLSTMBuilder_set_dropout_masks as ^
+    {`CoupledLSTMBuilder', `Int'} -> `()' #}
+
 
 
 {#fun init_FastLSTMBuilder as createFastSTMBuilder

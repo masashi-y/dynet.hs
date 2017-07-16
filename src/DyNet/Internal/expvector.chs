@@ -1,4 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module DyNet.Internal.ExpVector where
 
@@ -15,7 +17,7 @@ import Data.List ( reverse )
 #include "vector.h"
 
 -- ######################################################
--- ###################### Int Vector ####################
+-- ################# Expression Vector ##################
 -- ######################################################
 
 type instance Vector Expression = ExpressionVector
@@ -34,6 +36,12 @@ instance Storable ExpressionVector where
     alignment _ = 4
     poke = undefined
     peek = undefined
+
+instance Sequence Expression ExpressionVector where
+    withSequence = withExpressionVector
+
+instance Sequence Expression [Expression] where
+    withSequence s f = fromList s >>= (\s' -> withExpressionVector s' f)
 
 foreign import ccall safe "ExpressionVector_copy"
   expressionVectorCopy'_ :: Ptr ExpressionVector -> Ptr (Ptr Expression) -> IO (Ptr (Ptr Expression))

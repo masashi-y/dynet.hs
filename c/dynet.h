@@ -49,7 +49,7 @@ void init_Dim_v_int(CDim* d, LongVector* ds, int bs);
 int Dim_size(CDim* d);
 unsigned int Dim_batch_elems(CDim* d);
 int Dim_sum_dims(CDim* d);
-// CDim* Dim_truncate(CDim* d);
+void Dim_truncate(CDim* d, CDim* out);
 void Dim_resize(CDim* d, unsigned i);
 int Dim_ndims(CDim* d);
 int Dim_rows(CDim* d);
@@ -57,8 +57,8 @@ int Dim_cols(CDim* d);
 unsigned Dim_at(CDim* d, unsigned i);
 void Dim_set(CDim* d, unsigned i, unsigned s);
 void delete_Dim(CDim* d);
-// int Dim_size(CDim* d, unsigned i);
-// CDim* Dim_transpose(CDim* d);
+void Dim_transpose(CDim* d, CDim* out);
+void Dim_debug(CDim* d);
 
 void doNothing(void *);  // dummy deleter
 // Model (ParameterCollection)
@@ -82,6 +82,7 @@ void Parameter_get_fullname(CParameter* p, char* out);
 
 unsigned size_of_Tensor();
 void delete_Tensor(CTensor* t);
+void Tensor_debug(CTensor* t);
 CParameterInit* new_CParameterInitNormal(float m, float v);
 void init_CParameterInitNormal(CParameterInit* p, float m, float v);
 
@@ -96,6 +97,14 @@ void ComputationGraph_backward(CComputationGraph* g, CExpression* expr);
 
 float c_as_scalar(const CTensor* t);
 void c_as_vector(FloatVector* out, const CTensor* t);
+
+const CTensor* ComputationGraph_incremental_forward(CComputationGraph* g, CExpression* last);
+void ComputationGraph_invalidate(CComputationGraph* g);
+void ComputationGraph_clear(CComputationGraph* g);
+void ComputationGraph_checkpoint(CComputationGraph* g);
+void ComputationGraph_revert(CComputationGraph* g);
+void ComputationGraph_get_dimension(CComputationGraph* g, CDim* out, int index);
+
 
 CExpression* new_Expression();
 unsigned size_of_Expression();
