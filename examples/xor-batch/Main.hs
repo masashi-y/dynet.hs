@@ -14,10 +14,10 @@ main = do
     m <- D.createModel
     trainer <- D.createSimpleSGDTrainer m 0.1 0.0
 
-    p_W <- D.addParameters m [hiddenSize, 2]
-    p_b <- D.addParameters m [hiddenSize]
-    p_V <- D.addParameters m [1, hiddenSize]
-    p_a <- D.addParameters m [1]
+    p_W <- D.addParameters' m [hiddenSize, 2]
+    p_b <- D.addParameters' m [hiddenSize]
+    p_V <- D.addParameters' m [1, hiddenSize]
+    p_a <- D.addParameters' m [1]
 
     when (not $ null argv) $ do
         let (path:_) = argv

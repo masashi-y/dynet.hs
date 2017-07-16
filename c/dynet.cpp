@@ -131,8 +131,8 @@ void Parameter_get_fullname(CParameter* p, char* out) {
     strcpy(out, name.c_str());
 }
 
-void Model_add_parameters(CModel* m, CParameter* p, CDim* d) {
-   Parameter pp = reinterpret_cast<ParameterCollection*>(m)->add_parameters(*reinterpret_cast<Dim*>(d));
+void Model_add_parameters(CModel* m, CParameter* p, CDim* d, char* name) {
+   Parameter pp = reinterpret_cast<ParameterCollection*>(m)->add_parameters(*reinterpret_cast<Dim*>(d), std::string(name));
    *reinterpret_cast<Parameter*>(p) = pp;
 }
 
@@ -142,7 +142,7 @@ void Model_add_parameters_1(CModel* m, CParameter* p, CDim* d, CParameterInit* i
    *reinterpret_cast<Parameter*>(p) = pp;
 }
 
-void Model_add_lookup_parameters(CModel* m, CLookupParameter* p, unsigned n, CDim* d) {
+void Model_add_lookup_parameters(CModel* m, CLookupParameter* p, unsigned n, CDim* d, char* name) {
    LookupParameter pp = reinterpret_cast<ParameterCollection*>(m)->add_lookup_parameters(n, *reinterpret_cast<Dim*>(d));
    *reinterpret_cast<LookupParameter*>(p) = pp;
 }
@@ -151,14 +151,6 @@ void Model_add_lookup_parameters_1(CModel* m, CLookupParameter* p, unsigned n, C
    LookupParameter pp = reinterpret_cast<ParameterCollection*>(m)->add_lookup_parameters(
      n, *reinterpret_cast<Dim*>(d), *reinterpret_cast<ParameterInit*>(initializer), std::string(name));
    *reinterpret_cast<LookupParameter*>(p) = pp;
-}
-
-CParameterInit* new_CParameterInitNormal(float m, float v) {
-    return reinterpret_cast<CParameterInit*>(new ParameterInitNormal(m, v));
-}
-
-void init_CParameterInitNormal(CParameterInit* p, float m, float v) {
-    new (p) ParameterInitNormal(m, v);
 }
 
 CExpression* new_Expression() {
@@ -253,5 +245,42 @@ void ComputationGraph_revert(CComputationGraph* g) {
 void ComputationGraph_get_dimension(CComputationGraph* g, CDim* out, int index) {
     Dim& res = reinterpret_cast<ComputationGraph*>(g)->get_dimension(index);
     *reinterpret_cast<Dim*>(out) = res;
+}
+
+void delete_ParameterInit(CParameterInit* p) {
+    delete reinterpret_cast<ParameterInit*>(p);
+}
+
+
+CParameterInit* new_ParameterInitNormal(float m, float v) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitNormal(m, v));
+}
+
+CParameterInit* new_ParameterInitUniform(float scale) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitUniform(scale));
+}
+
+CParameterInit* new_ParameterInitConst(float c) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitConst(c));
+}
+
+CParameterInit* new_ParameterInitIdentity() {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitIdentity());
+}
+
+CParameterInit* new_ParameterInitGlorot(bool is_lookup, float gain) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitGlorot(is_lookup, gain));
+}
+
+CParameterInit* new_ParameterInitSaxe(float gain) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitSaxe(gain));
+}
+
+CParameterInit* new_ParameterInitFromFile(char* f) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitFromFile(std::string(f)));
+}
+
+CParameterInit* new_ParameterInitFromVector(FloatVector* v) {
+    return reinterpret_cast<CParameterInit*>(new ParameterInitFromVector(*reinterpret_cast<std::vector<float>*>(v)));
 }
 

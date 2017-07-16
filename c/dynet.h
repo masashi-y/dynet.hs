@@ -70,9 +70,9 @@ void delete_LookupParameter(CLookupParameter* p);
 unsigned size_of_Model();
 unsigned size_of_Parameter();
 unsigned size_of_LookupParameter();
-void Model_add_parameters(CModel* m, CParameter* p, CDim* d);
+void Model_add_parameters(CModel* m, CParameter* p, CDim* d, char* name);
 void Model_add_parameters_1(CModel* m, CParameter* p, CDim* d, CParameterInit* initializer, char* name);
-void Model_add_lookup_parameters(CModel* m, CLookupParameter* p, unsigned n, CDim* d);
+void Model_add_lookup_parameters(CModel* m, CLookupParameter* p, unsigned n, CDim* d, char* name);
 void Model_add_lookup_parameters_1(CModel* m, CLookupParameter* p, unsigned n, CDim* d, CParameterInit* initializer, char* name);
 void Parameter_get_fullname(CParameter* p, char* out);
 //     // float gradient_l2_norm() const
@@ -83,8 +83,17 @@ void Parameter_get_fullname(CParameter* p, char* out);
 unsigned size_of_Tensor();
 void delete_Tensor(CTensor* t);
 void Tensor_debug(CTensor* t);
-CParameterInit* new_CParameterInitNormal(float m, float v);
-void init_CParameterInitNormal(CParameterInit* p, float m, float v);
+
+
+void delete_ParameterInit(CParameterInit* p);
+CParameterInit* new_ParameterInitNormal(float m, float v);
+CParameterInit* new_ParameterInitUniform(float scale);
+CParameterInit* new_ParameterInitConst(float c);
+CParameterInit* new_ParameterInitIdentity();
+CParameterInit* new_ParameterInitGlorot(bool is_lookup, float gain);
+CParameterInit* new_ParameterInitSaxe(float gain);
+CParameterInit* new_ParameterInitFromFile(char* f);
+CParameterInit* new_ParameterInitFromVector(FloatVector* v);
 
 /***** ComputationGraph *****/
 CComputationGraph* new_ComputationGraph();

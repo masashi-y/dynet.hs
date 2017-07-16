@@ -36,6 +36,37 @@ import DyNet.Vector
 {#pointer *CExpression as Expression
     foreign finalizer delete_Expression newtype #}
 
+{#pointer *CParameterInit as ParameterInit
+    foreign finalizer delete_ParameterInit newtype #}
+
+
+{#fun new_ParameterInitNormal as initNormal
+    {`Float', `Float'} -> `ParameterInit' #}
+
+{#fun new_ParameterInitUniform as initUniform
+    {`Float'} -> `ParameterInit' #}
+
+{#fun new_ParameterInitConst as initConst
+    {`Float'} -> `ParameterInit' #}
+
+{#fun new_ParameterInitIdentity as initIdentity
+    {} -> `ParameterInit' #}
+
+{#fun new_ParameterInitGlorot as initGlorot
+    {`Bool', `Float'} -> `ParameterInit' #}
+
+{#fun new_ParameterInitSaxe as initSaxe
+    {`Float'} -> `ParameterInit' #}
+
+{#fun new_ParameterInitFromFile as initFromFile
+    {`String'} -> `ParameterInit' #}
+
+{#fun new_ParameterInitFromVector as initFromVector
+    `Sequence Float s' =>
+    {withSequence* `s'} -> `ParameterInit' #}
+
+
+
 {#pointer *CTensor as Tensor
     foreign finalizer delete_Tensor newtype #}
 
@@ -56,11 +87,20 @@ import DyNet.Vector
 
 {#fun Model_add_parameters as addParameters
     `Dimension d' =>
-    {`Model', +S, withDimension* `d'} -> `Parameter' #}
+    {`Model', +S, withDimension* `d', `String'} -> `Parameter' #}
+
+{#fun Model_add_parameters_1 as addParametersWith
+    `Dimension d' =>
+    {`Model', +S, withDimension* `d', `ParameterInit', `String'} -> `Parameter' #}
 
 {#fun Model_add_lookup_parameters as addLookupParameters
     `Dimension d' =>
-    {`Model', +S, `Int', withDimension* `d'} -> `LookupParameter' #}
+    {`Model', +S, `Int', withDimension* `d', `String'} -> `LookupParameter' #}
+
+{#fun Model_add_lookup_parameters_1 as addLookupParametersWith
+    `Dimension d' =>
+    {`Model', +S, `Int', withDimension* `d', `ParameterInit', `String'} -> `LookupParameter' #}
+
 
 {#fun ComputationGraph_print_graphviz as printGraphviz
     {`ComputationGraph'} -> `()' #} 

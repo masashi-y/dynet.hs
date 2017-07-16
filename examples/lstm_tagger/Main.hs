@@ -42,9 +42,9 @@ createBiLSTMTagger :: D.Model ->
 createBiLSTMTagger m vocab labels layers wembedDim hiddenDim mlpDim =
     Tagger <$> D.createDict vocab (Just "<unk>")
            <*> D.createDict labels Nothing
-           <*> D.addLookupParameters m vocabSize [wembedDim]
-           <*> D.addParameters m [mlpDim, hiddenDim*2]
-           <*> D.addParameters m [labelSize, mlpDim]
+           <*> D.addLookupParameters' m vocabSize [wembedDim]
+           <*> D.addParameters' m [mlpDim, hiddenDim*2]
+           <*> D.addParameters' m [labelSize, mlpDim]
            <*> D.createVanillaLSTMBuilder layers wembedDim hiddenDim m False
            <*> D.createVanillaLSTMBuilder layers wembedDim hiddenDim m False
     where vocabSize = length vocab + 1

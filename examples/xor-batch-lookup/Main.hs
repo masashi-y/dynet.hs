@@ -19,6 +19,16 @@ main = do
     p_V <- D.addParameters' m [1, hiddenSize]
     p_a <- D.addParameters' m [1]
 
+    xInit <- D.initFromVector [1.0,  1.0,
+                               1.0, -1.0,
+                              -1.0,  1.0,
+                              -1.0, -1.0]
+
+    yInit <- D.initFromVector [-1.0, 1.0, 1.0, -1.0]
+
+    xValues <- D.addLookupParametersWith m 4 [2] xInit ""
+    yValues <- D.addLookupParametersWith m 4 [1] yInit ""
+
     when (not $ null argv) $ do
         let (path:_) = argv
         loader <- D.createLoader path
@@ -31,31 +41,19 @@ main = do
         _V <- D.parameter cg p_V
         a <- D.parameter cg p_a
 
-        xValues <- V.fromList ([0, 0] :: [Float])
-        x <- D.input cg [2] xValues
-
-        yValue <- V.fromList ([0] :: [Float])
-        y <- D.input cg [1] yValue
+        x <- D.constLookup' cg xValues [0, 1, 2, 3]
+        y <- D.constLookup' cg yValues [0, 1, 2, 3]
 
         h <- D.tanh $ _W `D.mul` x `D.add` b
         y_pred <- _V `D.mul` h `D.add` a
-        lossExp <- D.squaredDistance y_pred y
+        loss <- D.squaredDistance y_pred y
+        sumLoss <- D.sumBatches loss
 
-        D.printGraphviz cg
-
-        let encode v = if v then 1 else -1
         forM [1..iteration] $ \iter -> do
-            loss' <- forM [0..3] $ \mi -> do
-                let x1 = (mi `mod` 2) == 1
-                    x2 = ((mi `div` 2) `mod` 2) == 1
-                V.insert xValues 0 (encode x1)
-                V.insert xValues 1 (encode x2)
-                V.insert yValue 0 (encode $ x1 == x2)
-                loss <- D.asScalar =<< D.forward cg lossExp
-                D.backward cg lossExp
-                D.update trainer 1.0
-                return loss
-            putStrLn $ "E = " ++ show ((sum loss') / (realToFrac $ length loss'))
+            loss' <- D.asScalar =<< D.forward cg sumLoss
+            D.backward cg sumLoss
+            D.update' trainer
+            putStrLn $ "E = " ++ show (loss' / 4)
 
         saver <- D.createSaver' "/tmp/xor.model"
         D.saveModel' saver m

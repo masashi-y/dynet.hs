@@ -12,7 +12,13 @@ module DyNet.Core (
     asScalar,
     asVector,
     addParameters,
+    addParameters',
+    addParametersWith,
+    addParametersWith',
     addLookupParameters,
+    addLookupParameters',
+    addLookupParametersWith,
+    addLookupParametersWith',
     printGraphviz,
     forward,
     backward,
@@ -33,6 +39,14 @@ module DyNet.Core (
     dimAt,
     dimSet,
     dimTranspose,
+    initNormal,
+    initUniform,
+    initConst,
+    initIdentity,
+    initGlorot,
+    initSaxe,
+    initFromFile,
+    initFromVector
 ) where
 
 import DyNet.Internal.Core
@@ -62,4 +76,16 @@ instance Debug Dim where
 instance Debug Tensor where
     print_ = tensorDebug
 
+
+addParameters' :: Dimension d => Model -> d -> IO Parameter
+addParameters' m d = addParameters m d ""
+
+addParametersWith' :: Dimension d => Model -> d -> ParameterInit -> IO Parameter
+addParametersWith' m d init = addParametersWith m d init ""
+
+addLookupParameters' :: Dimension d => Model -> Int -> d -> IO LookupParameter
+addLookupParameters' m n d = addLookupParameters m n d ""
+
+addLookupParametersWith' :: Dimension d => Model -> Int -> d -> ParameterInit -> IO LookupParameter
+addLookupParametersWith' m n d init = addLookupParametersWith m n d init ""
 
