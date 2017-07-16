@@ -18,9 +18,13 @@ To build C++ DyNet, please refer to https://dynet.readthedocs.io.
   git clone https://github.com/masashi-y/dynet.hs
   cd dynet.hs
   DYNET=/path/to/dynet EIGEN3_INCLUDE_DIR=/path/to/eigen stack build
-  stack exec train-xor # Hopefully the example program runs
-
+  stack exec train-xor # You may need to export LD_LIBRARY_PATH=c:/path/to/dynet
+  # Hopefully xor example runs!
 ```
+
+I have checked the build completes successfully in:
+- Ubuntu 16.04
+- macOS Sierra 10.12.5
 
 ## Usage
 
