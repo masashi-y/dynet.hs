@@ -57,8 +57,8 @@ class Vectorizable a where
 class Sequence t s where
     withSequence :: s -> (C2HSImp.Ptr (Vector t) -> IO b) -> IO b
 
-instance Sequence Float [Float] where
-    withSequence s f = fromList s >>= (\s' -> withFloatVector s' f)
+instance Real a => Sequence Float [a] where
+    withSequence s f = fromList (map realToFrac s) >>= (\s' -> withFloatVector s' f)
 
 instance Sequence Float FloatVector where
     withSequence = withFloatVector

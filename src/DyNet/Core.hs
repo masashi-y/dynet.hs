@@ -20,6 +20,7 @@ module DyNet.Core (
     initialize',
     argmax,
     Debug(..),
+    Dim,
     dim,
     dimSize,
     dimBatchElems,
@@ -53,12 +54,12 @@ argmax :: [Float] -> Int
 argmax list = fst $ maximumBy (\(_, m) (_, n) -> compare m n) $ zip [0..] list
 
 class Debug a where
-    printC :: a -> IO ()
+    print_ :: a -> IO ()
 
 instance Debug Dim where
-    printC = dimDebug
+    print_ = dimDebug
 
 instance Debug Tensor where
-    printC = tensorDebug
+    print_ = tensorDebug
 
 

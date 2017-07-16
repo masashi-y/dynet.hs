@@ -90,7 +90,7 @@ void Dim_transpose(CDim* d, CDim* out) {
 }
 
 void Dim_debug(CDim* d) {
-    cerr << *reinterpret_cast<Dim*>(d);
+    cerr << *reinterpret_cast<Dim*>(d) << endl;
 }
 
 unsigned size_of_Model() {
@@ -184,7 +184,7 @@ void delete_Tensor(CTensor* t) {
 }
 
 void Tensor_debug(CTensor* t) {
-    cerr << *reinterpret_cast<Tensor*>(t);
+    cerr << *reinterpret_cast<Tensor*>(t) << endl;
 }
 
 ComputationGraph* _cg = nullptr;
