@@ -29,13 +29,15 @@ library
                        DyNet.RNN,
                        DyNet.Dict,
                        DyNet.Vector,
-                       DyNet.Train
+                       DyNet.Train,
+                       DyNet.IO
   other-modules:       DyNet.Internal.Vector,
                        DyNet.Internal.Core,
                        DyNet.Internal.ExpVector,
-                       DyNet.Internal.Expr
-                       DyNet.Internal.RNN
-                       DyNet.Internal.Train
+                       DyNet.Internal.Expr,
+                       DyNet.Internal.RNN,
+                       DyNet.Internal.Train,
+                       DyNet.Internal.IO
   build-depends:       base >= 4.7 && < 5, text, hashtables
   build-tools:         c2hs
   extra-libraries:     dynetc, dynet

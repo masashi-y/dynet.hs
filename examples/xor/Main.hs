@@ -1,16 +1,16 @@
 
 import System.Environment
-import Control.Monad ( forM )
+import Control.Monad ( forM, when )
 import qualified DyNet.Core as D
 import qualified DyNet.Expr as D
 import qualified DyNet.Train as D
+import qualified DyNet.IO as D
 import qualified DyNet.Vector as V
 
 main = do
     let hiddenSize = 8
         iteration = 30
-    argv <- getArgs
-    D.initialize' argv
+    argv <- D.initialize' =<< getArgs
     m <- D.createModel
     trainer <- D.createSimpleSGDTrainer m 0.1 0.0
 
@@ -18,6 +18,12 @@ main = do
     p_b <- D.addParameters m [hiddenSize]
     p_V <- D.addParameters m [1, hiddenSize]
     p_a <- D.addParameters m [1]
+
+    when (not $ null argv) $ do
+        let (path:_) = argv
+        loader <- D.createLoader path
+        D.populateModel' loader m
+        putStrLn $ "Model loaded from: " ++ path
 
     D.withNewComputationGraph $ \cg -> do
         _W <- D.parameter cg p_W
@@ -50,4 +56,7 @@ main = do
                 D.update trainer 1.0
                 return loss
             putStrLn $ "E = " ++ show ((sum loss') / (realToFrac $ length loss'))
+
+        saver <- D.createSaver' "/tmp/xor.model"
+        D.saveModel' saver m
 

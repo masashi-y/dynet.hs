@@ -1,6 +1,6 @@
 CC=g++
 LIBRARY=libdynetc.so
-SRCS=dynet.cpp expr.cpp rnn.cpp trainer.cpp vector.cpp
+SRCS=dynet.cpp expr.cpp rnn.cpp trainer.cpp vector.cpp io.cpp
 OBJS=$(SRCS:.cpp=.o)
 DEPS=$(SRCS:.cpp=.d)
 CXXFLAGS= -std=c++11 -g -fpic -Wall -march=native -O2
