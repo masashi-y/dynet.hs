@@ -28,8 +28,10 @@ preConf' args flags = do
 confHook' :: (PD.GenericPackageDescription, PD.HookedBuildInfo)
           -> ConfigFlags -> IO LocalBuildInfo
 confHook' (description, buildInfo) flags = do
+    dynet <- getEnv "DYNET"
     localBuildInfo <- confHook DS.simpleUserHooks (description, buildInfo) flags
-    let packageDescription = localPkgDescr localBuildInfo
+    let dynet' = dynet ++ "/build/dynet"
+        packageDescription = localPkgDescr localBuildInfo
         library = fromJust $ PD.library packageDescription
         libraryBuildInfo = PD.libBuildInfo library
     dir <- getCurrentDirectory
@@ -38,7 +40,7 @@ confHook' (description, buildInfo) flags = do
             PD.library = Just $ library {
                 PD.libBuildInfo = libraryBuildInfo {
                     PD.includeDirs = (dir ++ "/c"):PD.includeDirs libraryBuildInfo,
-                    PD.extraLibDirs = (dir ++ "/c"):PD.extraLibDirs libraryBuildInfo
+                    PD.extraLibDirs = (dir ++ "/c"):(dynet':PD.extraLibDirs libraryBuildInfo)
                 }
             }
         }
