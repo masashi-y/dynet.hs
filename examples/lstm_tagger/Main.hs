@@ -17,13 +17,10 @@ import qualified DyNet.Dict as D
 import qualified DyNet.Train as D
 import qualified DyNet.Vector as V
 
+import Utils ( wordCount, accuracy, makeBatch )
 
 type Label = T.Text
 type Token = T.Text
-
-
-wordCount :: [Token] -> [(Token, Int)]
-wordCount = map (head &&& length) . group . sort
 
 
 data Tagger = Tagger { vocab :: D.Dict
@@ -112,18 +109,6 @@ train trainer tagger xs ys = do
             D.update trainer 1.0
             return (loss, realToFrac $ length x)
     return $ (sum $ map fst loss') / (sum $ map snd loss')
-
-
-makeBatch :: Int -> [a] -> [[a]]
-makeBatch _    [] = []
-makeBatch size xs = let (x, xs') = splitAt size xs in x:makeBatch size xs'
-
-
-accuracy :: Eq a => [[a]] -> [[a]] -> Float
-accuracy pred gold = realToFrac correct / realToFrac (length pred')
-    where correct = length $ filter (\(p, g) -> p == g) $ zip pred' gold'
-          pred' = join pred
-          gold' = join gold
 
 
 main' :: O.Flag "" '["iter"] "ITER" "iteration" (O.Def "30" Int)

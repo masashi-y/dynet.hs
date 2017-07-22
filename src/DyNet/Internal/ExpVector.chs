@@ -43,6 +43,9 @@ instance Sequence Expression ExpressionVector where
 instance Sequence Expression [Expression] where
     withSequence s f = fromList s >>= (\s' -> withExpressionVector s' f)
 
+instance Sequence Expression [IO Expression] where
+    withSequence s f = sequence s >>= fromList >>= (\s' -> withExpressionVector s' f)
+
 foreign import ccall safe "ExpressionVector_copy"
   expressionVectorCopy'_ :: Ptr ExpressionVector -> Ptr (Ptr Expression) -> IO (Ptr (Ptr Expression))
 
