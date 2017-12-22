@@ -9,7 +9,7 @@ module DyNet.Internal.Core where
 {#import DyNet.Internal.Vector #}
 
 import Foreign.C.Types ( CInt(..), CChar(..), CFloat(..), CLong(..), CUInt(..) )
-import Foreign.Ptr     ( Ptr(..), FunPtr(..), castPtr )
+import Foreign.Ptr     ( Ptr(..), FunPtr(..), castPtr, castFunPtr )
 import Foreign.Storable ( Storable(..) )
 import Foreign.Marshal.Alloc
 import Foreign.Marshal.Array
@@ -66,7 +66,6 @@ import DyNet.Vector
     {withSequence* `s'} -> `ParameterInit' #}
 
 
-
 {#pointer *CTensor as Tensor
     foreign finalizer delete_Tensor newtype #}
 
@@ -111,13 +110,14 @@ import DyNet.Vector
 -- Tensor returned by "forward" is owned by DyNet
 -- and should not finalize it using finalizer
 foreign import ccall "&doNothing"
-    deleteNothing :: FunPtr (Ptr Tensor -> IO ());
+    deleteNothing :: FunPtr (Ptr () -> IO ());
 
-notDelete x = newForeignPtr deleteNothing x >>= (return . Tensor)
+notDeleteTensor x = newForeignPtr (castFunPtr deleteNothing) x >>= (return . Tensor)
+notDeleteDim x = newForeignPtr (castFunPtr deleteNothing) x >>= (return . Dim)
 
 {#fun ComputationGraph_forward as forward
     {`ComputationGraph',
-     `Expression'} -> `Tensor' notDelete* #} 
+     `Expression'} -> `Tensor' notDeleteTensor* #} 
 
 {#fun ComputationGraph_backward as backward
     {`ComputationGraph',
@@ -125,7 +125,7 @@ notDelete x = newForeignPtr deleteNothing x >>= (return . Tensor)
 
 {#fun ComputationGraph_incremental_forward as incrementalForward
     {`ComputationGraph',
-     `Expression'} -> `Tensor' notDelete* #} 
+     `Expression'} -> `Tensor' notDeleteTensor* #} 
 
 {#fun ComputationGraph_invalidate as invalidate
     {`ComputationGraph'} -> `()' #}
@@ -140,7 +140,16 @@ notDelete x = newForeignPtr deleteNothing x >>= (return . Tensor)
     {`ComputationGraph'} -> `()' #}
 
 -- {#fun ComputationGraph_get_dimension as getDimension
---     {`ComputationGraph', +S, `Int'} -> `Dim' notDelete* #}
+--     {`ComputationGraph', +S, `Int'} -> `Dim' notDeleteDim* #}
+
+{#fun Expression_value as getValue
+    {`Expression'} -> `Tensor' notDeleteTensor* #} 
+
+{#fun Expression_gradient as getGradient
+    {`Expression'} -> `Tensor' notDeleteTensor* #} 
+
+{#fun Expression_dim as getDim
+    {`Expression'} -> `Dim' notDeleteDim* #} 
 
 instance Storable Model where
     sizeOf _ = sizeOfModel

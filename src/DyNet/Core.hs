@@ -21,7 +21,11 @@ module DyNet.Core (
     addLookupParametersWith',
     printGraphviz,
     forward,
+    incrementalForward,
     backward,
+    getValue,
+    getGradient,
+    getDim,
     initialize,
     initialize',
     argmax,
@@ -61,7 +65,7 @@ withNewComputationGraph :: (ComputationGraph -> IO a) -> IO a
 withNewComputationGraph f = do
     cg@(ComputationGraph ptr) <- createComputationGraph
     res <- f cg
-    -- deleteComputationGraph cg
+    deleteComputationGraph cg
     return res
 
 argmax :: [Float] -> Int

@@ -166,6 +166,20 @@ void delete_Expression(CExpression* x) {
     reinterpret_cast<Expression*>(x)->~Expression();
 }
 
+const CTensor* Expression_value(CExpression* x) {
+    const Tensor* res = &reinterpret_cast<Expression*>(x)->value();
+    return reinterpret_cast<const CTensor*>(res);
+}
+
+const CTensor* Expression_gradient(CExpression* x) {
+    const Tensor* res = &reinterpret_cast<Expression*>(x)->gradient();
+    return reinterpret_cast<const CTensor*>(res);
+}
+
+const CDim* Expression_dim(CExpression* x) {
+    const Dim* res = &reinterpret_cast<Expression*>(x)->dim();
+    return reinterpret_cast<const CDim*>(res);
+}
 
 unsigned size_of_Tensor() {
     return sizeof(Tensor);
@@ -179,14 +193,8 @@ void Tensor_debug(CTensor* t) {
     cerr << *reinterpret_cast<Tensor*>(t) << endl;
 }
 
-ComputationGraph* _cg = nullptr;
-
-
 CComputationGraph* new_ComputationGraph() {
-    if (_cg != nullptr)
-        delete _cg;
-    _cg = new ComputationGraph();
-    return reinterpret_cast<CComputationGraph*>(_cg);
+    return reinterpret_cast<CComputationGraph*>(new ComputationGraph());
 }
 
 void init_ComputationGraph(CComputationGraph* g) {

@@ -118,6 +118,10 @@ void ComputationGraph_get_dimension(CComputationGraph* g, CDim* out, int index);
 CExpression* new_Expression();
 unsigned size_of_Expression();
 void delete_Expression(CExpression* x);
+// bool Expression_is_stale();
+const CTensor* Expression_value(CExpression* x);
+const CTensor* Expression_gradient(CExpression* x);
+const CDim* Expression_dim(CExpression* x);
 // CExpression c_input "dynet::input" (CComputationGraph& g, float s)   #
 void c_input (CExpression* out, CComputationGraph* g, float *ps);
 void c_input_1 (CExpression* out, CComputationGraph* g, CDim* d, FloatVector* pdata);
