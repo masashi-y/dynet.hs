@@ -34,7 +34,7 @@ I have checked the build completes successfully in:
 
 ## Usage
 
-The documentation (not perfect; copy & pasted from the official one) is avilable:
+The [documentation](https://cl.naist.jp/~masashi-y/dynet_documentation/) (not perfect; copy & pasted from the official one) is avilable:
 
 ```shell
   DYNET=/path/to/dynet EIGEN3_INCLUDE_DIR=/path/to/eigen stack haddock
