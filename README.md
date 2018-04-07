@@ -6,15 +6,21 @@ Haskell binding for [DyNet](https://github.com/clab/dynet).
 
 #### Requirements
 - C++ build environment for DyNet
+- DyNet version 2.0.3
 - [haskell-stack](https://www.haskellstack.org)
 
 To build C++ DyNet, please refer to https://dynet.readthedocs.io.
 
 ```shell
-  git clone https://github.com/clab/dynet
-  # Build this snapshot of DyNet following the instruction
-  cd dynet && git checkout 2204e64fcfad6ad14425ab17317e30eaf915268d
-  # clone dynet.hs to some other place
+  # Build DyNet version 2.0.3
+  wget https://github.com/clab/dynet/archive/2.0.3.tar.gz
+  tar xvf 2.0.3.tar.gz && cd dynet-2.0.3
+  mkdir build && cmake .. # Please refer to https://dynet.readthedocs.io for the detail.
+```
+
+Build DyNet.hs:
+
+```shell
   git clone https://github.com/masashi-y/dynet.hs
   cd dynet.hs
   DYNET=/path/to/dynet EIGEN3_INCLUDE_DIR=/path/to/eigen stack build
@@ -27,6 +33,12 @@ I have checked the build completes successfully in:
 - macOS Sierra 10.12.5
 
 ## Usage
+
+The documentation (not perfect; copy & pasted from the official one) is avilable:
+
+```shell
+  DYNET=/path/to/dynet EIGEN3_INCLUDE_DIR=/path/to/eigen stack haddock
+```
 
 You can write in almost the same manner as in C++ and Python versions.
 

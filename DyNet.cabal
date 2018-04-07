@@ -93,6 +93,16 @@ executable treelstm
   extra-libraries:     dynetc, dynet
   default-language:    Haskell2010
 
+executable rte
+  hs-source-dirs:      examples/rte, examples/utils
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base, text, optparse-declarative, mtl, parsec
+                     , DyNet
+  other-modules:       Paths_DyNet, Utils
+  extra-libraries:     dynetc, dynet
+  default-language:    Haskell2010
+
 test-suite DyNet-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
