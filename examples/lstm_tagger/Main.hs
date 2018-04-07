@@ -23,8 +23,8 @@ type Label = T.Text
 type Token = T.Text
 
 
-data Tagger = Tagger { vocab :: D.Dict
-                     , labels :: D.Dict
+data Tagger = Tagger { vocab :: D.Dict Token
+                     , labels :: D.Dict Label
                      , wembed :: D.LookupParameter
                      , pH :: D.Parameter
                      , pO :: D.Parameter
@@ -106,7 +106,7 @@ train trainer tagger xs ys = do
             lossExp <- sentLoss cg tagger x y
             loss <- D.asScalar =<< D.forward cg lossExp
             D.backward cg lossExp
-            D.update trainer 1.0
+            D.update trainer
             return (loss, realToFrac $ length x)
     return $ (sum $ map fst loss') / (sum $ map snd loss')
 
@@ -143,7 +143,6 @@ main' iter layers wembed hidden mlp trainData evalData = liftIO $ do
             loss <- train trainer tagger xs ys
             D.status trainer
             print loss
-            D.updateEpoch trainer 1.0
             when (i `mod` evalCycle == 0) $ do
                 predY <- mapM (tagSent tagger) evalX
                 putStrLn $ "accuracy: " ++ show (accuracy predY evalY)

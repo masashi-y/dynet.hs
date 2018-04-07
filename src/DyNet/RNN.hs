@@ -1,5 +1,20 @@
 
 module DyNet.RNN (
+    -- * RNN types
+    SimpleRNNBuilder,
+    VanillaLSTMBuilder,
+    CoupledLSTMBuilder,
+    FastLSTMBuilder,
+    GRUBuilder,
+
+    -- * Initialize RNNs
+    createSimpleRNNBuilder,
+    createVanillaLSTMBuilder,
+    createCoupledLSTMBuilder,
+    createFastSTMBuilder,
+    createGRUuilder,
+
+    -- * Operations on RNNs
     state,
     newGraph,
     newGraph',
@@ -21,17 +36,7 @@ module DyNet.RNN (
     num_h0_components,
     copy,
     -- RNNBuilder_get_parameter_collection
-    createSimpleRNNBuilder,
     addAuxiliaryInput,
-    createVanillaLSTMBuilder,
-    createCoupledLSTMBuilder,
-    createFastSTMBuilder,
-    createGRUuilder,
-    SimpleRNNBuilder,
-    VanillaLSTMBuilder,
-    CoupledLSTMBuilder,
-    FastLSTMBuilder,
-    GRUBuilder,
 ) where
 
 
@@ -62,7 +67,20 @@ import DyNet.Internal.RNN
 --
 
 
+{-|
+@
+    newGraph' rnn cg = newGraph rnn cg True
+@
+-}
 newGraph' rnn cg = newGraph rnn cg True
+
+{-|
+[@brief@] startNewSequence' equals to startNewSequence without h_0
+
+@
+    startNewSequence' rnn = startNewSequence rnn []
+@
+-}
 startNewSequence' :: RNN r => r -> IO ()
 startNewSequence' rnn = fromList ([] :: [Expression]) >>= (\x' -> startNewSequence rnn x')
 

@@ -28,12 +28,12 @@ data Tree a = Node { get :: a, children :: [Tree a] }
 
 
 getNonTerms :: Tree a -> [a]
-getNonTerms (Node v children) = v:(concat $ map getNonTerms children)
+getNonTerms (Node v children) = v:concatMap getNonTerms children
 getNonTerms (Leaf _) = []
 
 
 getTerms :: Tree a -> [Token]
-getTerms (Node _ children) = (concat $ map getTerms children)
+getTerms (Node _ children) = concatMap getTerms children
 getTerms (Leaf w) = [w]
 
 
@@ -68,7 +68,7 @@ readTrees fileName = do
               Left e -> error $ show e
 
 
-data TreeLSTM = TreeLSTM { vocab :: D.Dict
+data TreeLSTM = TreeLSTM { vocab :: D.Dict Token
                          , pE :: D.LookupParameter
                          , pWS :: [D.Parameter]
                          , pUS :: [D.Parameter]
@@ -128,7 +128,7 @@ train trainer pW lstm xs ys = do
             lossExp <- D.sum losses
             loss <- D.asScalar =<< D.forward cg lossExp
             D.backward cg lossExp
-            D.update' trainer
+            D.update trainer
             return (loss, realToFrac $ length y)
     return $ (sum $ map fst loss') / (sum $ map snd loss')
 
@@ -166,7 +166,6 @@ main' iter wembed hidden trainData evalData = liftIO $ do
             loss <- train trainer pW lstm xs ys
             D.status trainer
             print loss
-            D.updateEpoch trainer 1.0
             when (i `mod` evalCycle == 0) $ do
                 predY <- forM evalX $ \x -> do
                     D.withNewComputationGraph $ \cg -> do

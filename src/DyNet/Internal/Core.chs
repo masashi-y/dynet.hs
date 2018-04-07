@@ -260,6 +260,27 @@ instance Sequence Int64 d => Dimension d where
 {#fun Dim_debug as ^
     {`Dim'} -> `()' #}
 
+{-|
+    @initialize argv shared_parameters@ parses argv until @"--"@, and initializes DyNet.
+    return the rest of @argv@ in @['String']@.
+
+    Parameters:
+
+        * @--dynet-mem@ or @--dynet_mem@
+        the memory, in megabytes, to reserve
+        * @--dynet-weight-decay@ or @--dynet_weight_decay@
+        the weight decay per update
+        * @--dynet-seed@ or @--dynet_seed@
+        the random number seed
+        * @--dynet-autobatch@ or @--dynet_autobatch@
+        0 for none 1 for on
+        * @--dynet-profiling@ or @--dynet_profiling@
+        0 for none 1 for on
+        * @--dynet-gpus@ or @--dynet_gpus@
+        number of GPUs to use
+        * @--dynet-devices@ or @--dynet_devices@
+        comma separated list of CPU and physical GPU ids to use (e.g. CPU:1,GPU:3)
+-}
 initialize :: [String] -> Bool -> IO [String]
 initialize argv shared_parameters = do
     let argv' = "":argv

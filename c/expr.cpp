@@ -85,8 +85,8 @@ void c_zeroes(CExpression* out, CComputationGraph* g, CDim* d) {
 }
 
 // random_normal
-void c_random_normal(CExpression* out, CComputationGraph* g, CDim* d) {
-    Expression res = random_normal(*reinterpret_cast<ComputationGraph*>(g), *reinterpret_cast<Dim*>(d));
+void c_random_normal(CExpression* out, CComputationGraph* g, CDim* d, float mean, float stddev) {
+    Expression res = random_normal(*reinterpret_cast<ComputationGraph*>(g), *reinterpret_cast<Dim*>(d), mean, stddev);
     *reinterpret_cast<Expression*>(out) = res;
 }
 
@@ -493,8 +493,8 @@ void c_moment_elems(CExpression* out, CExpression* x, unsigned r) {
 }
 
 // moment_dim
-void c_moment_dim(CExpression* out, CExpression* x, unsigned d, unsigned r) {
-    Expression res = moment_dim(*reinterpret_cast<Expression*>(x), d, r);
+void c_moment_dim(CExpression* out, CExpression* x, UIntVector* dims, unsigned r, bool b, unsigned n) {
+    Expression res = moment_dim(*reinterpret_cast<Expression*>(x), *reinterpret_cast<std::vector<unsigned>*>(dims), r, b, n);
     *reinterpret_cast<Expression*>(out) = res;
 }
 
@@ -511,14 +511,14 @@ void c_mean_batches(CExpression* out, CExpression* x) {
 }
 
 // mean_dim
-void c_mean_dim(CExpression* out, CExpression* x, unsigned d) {
-    Expression res = mean_dim(*reinterpret_cast<Expression*>(x), d);
+void c_mean_dim(CExpression* out, CExpression* x, UIntVector* dims, bool b, unsigned n) {
+    Expression res = mean_dim(*reinterpret_cast<Expression*>(x), *reinterpret_cast<std::vector<unsigned>*>(dims), b, n);
     *reinterpret_cast<Expression*>(out) = res;
 }
 
 // std_dim
-void c_std_dim(CExpression* out, CExpression* x, unsigned d) {
-    Expression res = std_dim(*reinterpret_cast<Expression*>(x), d);
+void c_std_dim(CExpression* out, CExpression* x, UIntVector* dims, bool b, unsigned n) {
+    Expression res = std_dim(*reinterpret_cast<Expression*>(x), *reinterpret_cast<std::vector<unsigned>*>(dims), b, n);
     *reinterpret_cast<Expression*>(out) = res;
 }
 

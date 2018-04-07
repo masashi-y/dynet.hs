@@ -1,16 +1,21 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module DyNet.Core (
+    -- * Types
     Model,
     Parameter,
     LookupParameter,
     Expression,
     Tensor,
     ComputationGraph,
+    Dim,
+
+    -- * DyNet initialization
+    initialize,
+    initialize',
+
+    -- * Operations on Model
     createModel,
-    withNewComputationGraph,
-    asScalar,
-    asVector,
     addParameters,
     addParameters',
     addParametersWith,
@@ -19,18 +24,24 @@ module DyNet.Core (
     addLookupParameters',
     addLookupParametersWith,
     addLookupParametersWith',
+    withNewComputationGraph,
+
+    -- * Operations on ComputationGraph
     printGraphviz,
     forward,
     incrementalForward,
     backward,
+
+    -- * Operations on Tensor
+    asScalar,
+    asVector,
+
+    -- * Operations on Expression
     getValue,
     getGradient,
     getDim,
-    initialize,
-    initialize',
-    argmax,
-    Debug(..),
-    Dim,
+
+    -- * Operations on Dim
     dim,
     dimSize,
     dimBatchElems,
@@ -43,6 +54,8 @@ module DyNet.Core (
     dimAt,
     dimSet,
     dimTranspose,
+
+    -- * Parameter initializers
     initNormal,
     initUniform,
     initConst,
@@ -50,7 +63,11 @@ module DyNet.Core (
     initGlorot,
     initSaxe,
     initFromFile,
-    initFromVector
+    initFromVector,
+
+    -- * Some utilities
+    argmax,
+    Debug(..),
 ) where
 
 import DyNet.Internal.Core
@@ -58,6 +75,11 @@ import DyNet.Internal.ExpVector
 import Foreign.ForeignPtr ( finalizeForeignPtr )
 import Data.List ( maximumBy )
 
+{-|
+@
+    initialize' argv == initialize argv False
+@
+-}
 initialize' :: [String] -> IO [String]
 initialize' argv = initialize argv False
 

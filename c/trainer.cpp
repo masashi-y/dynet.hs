@@ -15,16 +15,16 @@ using namespace std;
 //    *reinterpret_cast<const std::vector<unsigned>*>(updated_lookup_params), scale);
 // }
 
-void Trainer_update(CTrainer* t, float scale) {
-    reinterpret_cast<Trainer*>(t)->update(scale);
+void Trainer_update(CTrainer* t) {
+    reinterpret_cast<Trainer*>(t)->update();
 }
 
 void Trainer_update_epoch(CTrainer* t, float r) {
     reinterpret_cast<Trainer*>(t)->update_epoch(r);
 }
 
-float Trainer_clip_gradients(CTrainer* t, float scale) {
-    return reinterpret_cast<Trainer*>(t)->clip_gradients(scale);
+float Trainer_clip_gradients(CTrainer* t) {
+    return reinterpret_cast<Trainer*>(t)->clip_gradients();
 }
 
 void Trainer_rescale_and_reset_weight_decay(CTrainer* t) {
@@ -36,9 +36,9 @@ void Trainer_status(CTrainer* t) {
 }
 
 
-void init_SimpleSGDTrainer(CSimpleSGDTrainer* t, CModel* m, float e0, float edecay) {
+void init_SimpleSGDTrainer(CSimpleSGDTrainer* t, CModel* m, float learning_rate) {
     new (t) SimpleSGDTrainer(*reinterpret_cast<ParameterCollection*>(m),
-                              e0, edecay);
+                              learning_rate);
 }
 
 void init_CyclicalSGDTrainer(CCyclicalSGDTrainer* t, CModel* m, float e0_min, float e0_max, float step_size, float gamma, float edecay) {
@@ -46,29 +46,29 @@ void init_CyclicalSGDTrainer(CCyclicalSGDTrainer* t, CModel* m, float e0_min, fl
                               e0_min, e0_max, step_size, gamma, edecay);
 }
 
-void init_MomentumSGDTrainer(CMomentumSGDTrainer* t, CModel* m, float e0, float mom, float edecay) {
+void init_MomentumSGDTrainer(CMomentumSGDTrainer* t, CModel* m, float learning_rate, float mom) {
     new (t) MomentumSGDTrainer(*reinterpret_cast<ParameterCollection*>(m),
-                              e0, mom, edecay);
+                              learning_rate, mom);
 }
 
-void init_AdagradTrainer(CAdagradTrainer* t, CModel* m, float e0, float eps, float edecay) {
+void init_AdagradTrainer(CAdagradTrainer* t, CModel* m, float learning_rate, float eps) {
     new (t) AdagradTrainer(*reinterpret_cast<ParameterCollection*>(m),
-                            e0, eps, edecay);
+                            learning_rate, eps);
 }
 
-void init_AdadeltaTrainer(CAdadeltaTrainer* t, CModel* m, float eps, float rho, float edecay) {
+void init_AdadeltaTrainer(CAdadeltaTrainer* t, CModel* m, float eps, float rho) {
     new (t) AdadeltaTrainer(*reinterpret_cast<ParameterCollection*>(m),
-                            eps, rho, edecay);
+                            eps, rho);
 }
 
-void init_RMSPropTrainer(CRMSPropTrainer* t, CModel* m, float e0, float eps, float rho, float edecay) {
+void init_RMSPropTrainer(CRMSPropTrainer* t, CModel* m, float learning_rate, float eps, float rho) {
     new (t) RMSPropTrainer(*reinterpret_cast<ParameterCollection*>(m),
-                           e0, eps, rho, edecay);
+                           learning_rate, eps, rho);
 }
 
-void init_AdamTrainer(CAdamTrainer* t, CModel* m, float e0, float beta_1, float beta_2, float eps, float edecay) {
+void init_AdamTrainer(CAdamTrainer* t, CModel* m, float learning_rate, float beta_1, float beta_2, float eps) {
     new (t) AdamTrainer(*reinterpret_cast<ParameterCollection*>(m),
-                        e0, beta_1, beta_2, eps, edecay);
+                        learning_rate, beta_1, beta_2, eps);
 }
 
 unsigned size_of_SimpleSGDTrainer() {

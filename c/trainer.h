@@ -34,20 +34,20 @@ extern "C" {
 
 
 void Trainer_update_subset(CTrainer* t, UIntVector* updated_params, UIntVector* updated_lookup_params, float scale);
-void Trainer_update(CTrainer* t, float scale);
+void Trainer_update(CTrainer* t);
 void Trainer_update_epoch(CTrainer* t, float r);
-float Trainer_clip_gradients(CTrainer* t, float scale);
+float Trainer_clip_gradients(CTrainer* t);
 void Trainer_rescale_and_reset_weight_decay(CTrainer* t);
 void Trainer_status(CTrainer* t);
 
 
-void init_SimpleSGDTrainer(CSimpleSGDTrainer* t, CModel* m, float e0, float edecay);
+void init_SimpleSGDTrainer(CSimpleSGDTrainer* t, CModel* m, float learning_rate);
 void init_CyclicalSGDTrainer(CCyclicalSGDTrainer* t, CModel* m, float e0_min, float e0_max, float step_size, float gamma, float edecay);
-void init_MomentumSGDTrainer(CMomentumSGDTrainer* t, CModel* m, float e0, float mom, float edecay);
-void init_AdagradTrainer(CAdagradTrainer* t, CModel* m, float e0, float eps, float edecay);
-void init_AdadeltaTrainer(CAdadeltaTrainer* t, CModel* m, float eps, float rho, float edecay);
-void init_RMSPropTrainer(CRMSPropTrainer* t, CModel* m, float e0, float eps, float rho, float edecay);
-void init_AdamTrainer(CAdamTrainer* t, CModel* m, float e0, float beta_1, float beta_2, float eps, float edecay);
+void init_MomentumSGDTrainer(CMomentumSGDTrainer* t, CModel* m, float learning_rate, float mom);
+void init_AdagradTrainer(CAdagradTrainer* t, CModel* m, float learning_rate, float eps);
+void init_AdadeltaTrainer(CAdadeltaTrainer* t, CModel* m, float eps, float rho);
+void init_RMSPropTrainer(CRMSPropTrainer* t, CModel* m, float learning_rate, float eps, float rho);
+void init_AdamTrainer(CAdamTrainer* t, CModel* m, float learning_rate, float beta_1, float beta_2, float eps);
 
 unsigned size_of_SimpleSGDTrainer();
 unsigned size_of_CyclicalSGDTrainer();

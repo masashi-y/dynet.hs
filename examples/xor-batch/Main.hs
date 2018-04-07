@@ -12,7 +12,7 @@ main = do
         iteration = 30
     argv <- D.initialize' =<< getArgs
     m <- D.createModel
-    trainer <- D.createSimpleSGDTrainer m 0.1 0.0
+    trainer <- D.createSimpleSGDTrainer m 0.1
 
     p_W <- D.addParameters' m [hiddenSize, 2]
     p_b <- D.addParameters' m [hiddenSize]
@@ -50,7 +50,7 @@ main = do
         forM [1..iteration] $ \iter -> do
             loss' <- D.asScalar =<< D.forward cg sumLoss
             D.backward cg sumLoss
-            D.update' trainer
+            D.update trainer
             putStrLn $ "E = " ++ show (loss' / 4)
 
         saver <- D.createSaver' "/tmp/xor.model"

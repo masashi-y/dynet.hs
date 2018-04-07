@@ -12,7 +12,7 @@ main = do
         iteration = 30
     argv <- D.initialize' =<< getArgs
     m <- D.createModel
-    trainer <- D.createSimpleSGDTrainer m 0.1 0.0
+    trainer <- D.createSimpleSGDTrainer m 0.1
 
     p_W <- D.addParameters' m [hiddenSize, 2]
     p_b <- D.addParameters' m [hiddenSize]
@@ -53,7 +53,7 @@ main = do
                 V.insert yValue 0 (encode $ x1 == x2)
                 loss <- D.asScalar =<< D.forward cg lossExp
                 D.backward cg lossExp
-                D.update trainer 1.0
+                D.update trainer
                 return loss
             putStrLn $ "E = " ++ show ((sum loss') / (realToFrac $ length loss'))
 

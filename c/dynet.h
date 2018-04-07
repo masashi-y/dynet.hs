@@ -138,7 +138,7 @@ void c_lookup_1 (CExpression* out, CComputationGraph* g, CLookupParameter* p, UI
 void c_const_lookup (CExpression* out, CComputationGraph* g, CLookupParameter* p, unsigned* pindex);
 void c_const_lookup_1 (CExpression* out, CComputationGraph* g, CLookupParameter* p, UIntVector* pindices);
 void c_zeroes (CExpression* out, CComputationGraph* g, CDim* d);
-void c_random_normal (CExpression* out, CComputationGraph* g, CDim* d);
+void c_random_normal (CExpression* out, CComputationGraph* g, CDim* d, float, float);
 void c_random_bernoulli (CExpression* out, CComputationGraph* g, CDim* d, float p, float scale);
 void c_random_uniform (CExpression* out, CComputationGraph* g, CDim* d, float left, float right);
 void c_random_gumbel (CExpression* out, CComputationGraph* g, CDim* d, float left, float right);
@@ -224,11 +224,11 @@ void c_sum_batches (CExpression* out, CExpression* x);
 void c_sum_elems (CExpression* out, CExpression* x);
 void c_moment_batches (CExpression* out, CExpression* x, unsigned r);
 void c_moment_elems (CExpression* out, CExpression* x, unsigned r);
-void c_moment_dim (CExpression* out, CExpression* x, unsigned d, unsigned r);
+void c_moment_dim(CExpression* out, CExpression* x, UIntVector* dims, unsigned r, bool b, unsigned n);
 void c_mean_elems (CExpression* out, CExpression* x);
 void c_mean_batches (CExpression* out, CExpression* x);
-void c_mean_dim (CExpression* out, CExpression* x, unsigned d);
-void c_std_dim (CExpression* out, CExpression* x, unsigned d);
+void c_mean_dim(CExpression* out, CExpression* x, UIntVector* dims, bool b, unsigned n);
+void c_std_dim(CExpression* out, CExpression* x, UIntVector* dims, bool b, unsigned n);
 void c_std_elems (CExpression* out, CExpression* x);
 void c_std_batches (CExpression* out, CExpression* x);
 

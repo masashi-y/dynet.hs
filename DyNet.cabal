@@ -38,7 +38,7 @@ library
                        DyNet.Internal.RNN,
                        DyNet.Internal.Train,
                        DyNet.Internal.IO
-  build-depends:       base >= 4.7 && < 5, text, hashtables
+  build-depends:       base >= 4.7 && < 5, text, hashtables, hashable
   build-tools:         c2hs
   extra-libraries:     dynetc, dynet
   default-language:    Haskell2010

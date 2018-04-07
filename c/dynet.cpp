@@ -133,24 +133,24 @@ void Parameter_get_fullname(CParameter* p, char* out) {
 
 void Model_add_parameters(CModel* m, CParameter* p, CDim* d, char* name) {
    Parameter pp = reinterpret_cast<ParameterCollection*>(m)->add_parameters(*reinterpret_cast<Dim*>(d), std::string(name));
-   *reinterpret_cast<Parameter*>(p) = pp;
+   new (reinterpret_cast<Parameter*>(p)) Parameter(pp);
 }
 
 void Model_add_parameters_1(CModel* m, CParameter* p, CDim* d, CParameterInit* initializer, char* name) {
    Parameter pp = reinterpret_cast<ParameterCollection*>(m)->add_parameters(
      *reinterpret_cast<Dim*>(d), *reinterpret_cast<ParameterInit*>(initializer), std::string(name));
-   *reinterpret_cast<Parameter*>(p) = pp;
+   new (reinterpret_cast<Parameter*>(p)) Parameter(pp);
 }
 
 void Model_add_lookup_parameters(CModel* m, CLookupParameter* p, unsigned n, CDim* d, char* name) {
    LookupParameter pp = reinterpret_cast<ParameterCollection*>(m)->add_lookup_parameters(n, *reinterpret_cast<Dim*>(d));
-   *reinterpret_cast<LookupParameter*>(p) = pp;
+   new (reinterpret_cast<LookupParameter*>(p)) LookupParameter(pp);
 }
 
 void Model_add_lookup_parameters_1(CModel* m, CLookupParameter* p, unsigned n, CDim* d, CParameterInit* initializer, char* name) {
    LookupParameter pp = reinterpret_cast<ParameterCollection*>(m)->add_lookup_parameters(
      n, *reinterpret_cast<Dim*>(d), *reinterpret_cast<ParameterInit*>(initializer), std::string(name));
-   *reinterpret_cast<LookupParameter*>(p) = pp;
+   new (reinterpret_cast<LookupParameter*>(p)) LookupParameter(pp);
 }
 
 CExpression* new_Expression() {
